@@ -47,7 +47,7 @@ static _TCHAR *_ColumnName[NUM_COLUMNS] =
 {_T("LineNumber"), _T("FunctionName"), _T("StartTime"), _T("FinishTime"), _T("RunTime")};
 
 static int _ColumnPlace[NUM_COLUMNS] =
-{LVCFMT_LEFT, LVCFMT_CENTER,LVCFMT_CENTER, LVCFMT_CENTER, LVCFMT_CENTER};
+{LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT};
 
 static int _ColumnWidth[NUM_COLUMNS] =
 {70, 105, 130, 130, 105};
@@ -57,8 +57,8 @@ void CStatisticListView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 	CListCtrl& ListCtrl = GetListCtrl();
-	ModifyStyle(0, LVS_REPORT | LVS_SINGLESEL);
-	ListCtrl.ModifyStyleEx(0, LVS_EX_FULLROWSELECT);
+	ModifyStyle(LVS_TYPEMASK, LVS_REPORT | LVS_SINGLESEL);
+	ListCtrl.SetExtendedStyle(ListCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	// building columns
 	int i;

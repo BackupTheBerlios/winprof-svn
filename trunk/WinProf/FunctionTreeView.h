@@ -17,14 +17,6 @@ typedef struct {
 	DWORD64 start, finish, diff;
 } RUN_INFO;
 
-/*******************************
-* global statistics information
-* hash : function_id(32 bits = unsigned long) -> (number of calls, average run time)
-*******************************/
-/*using namespace std;
-typedef pair<unsigned long, DWORD64> info_type;
-typedef hash_map<unsigned long, info_type> map_type; // alexeyd */
-
 class CFunctionTreeView : public CTreeView
 {
 protected: // create from serialization only

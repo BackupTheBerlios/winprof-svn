@@ -134,14 +134,14 @@ void CFunctionTreeView::FillTheTree()
 
 			// insert into the tree a new node
 			CString s;
-			s.Format("%ld", call_info.address);
+			s.Format("%x", call_info.address);
 			current = ctrl.InsertItem(s, current);
 		} else {
 			#ifdef _DEBUG
 			// if the call log file is built properly this if is never entered
 			if(stack.back().address != call_info.address){
 				CString s;
-				s.Format("improper input file: %ld %ld\n", stack.back().address, call_info.address);
+				s.Format("improper input file: %x %x\n", stack.back().address, call_info.address);
 				OutputDebugString(s);
 			}
 			#endif
@@ -161,7 +161,7 @@ void CFunctionTreeView::FillTheTree()
 			function_call_map[addr].time += func.diff;
 
 			// prepare information to be transferred to the table
-			CString ad; ad.Format("%ld", func.address);
+			CString ad; ad.Format("%x", func.address);
 			CString s1(dword64tostr(func.start));
 			CString s2(dword64tostr(func.finish));
 			CString s3(dword64tostr(func.diff));

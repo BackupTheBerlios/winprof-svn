@@ -4,7 +4,6 @@
 
 #pragma once
 
-
 class CStatisticListView : public CListView
 {
 protected: // create from serialization only
@@ -21,20 +20,19 @@ public:
 // Overrides
 	public:
 virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
-protected:
+public:
 	virtual void OnInitialUpdate(); // called first time after construct
 
 // Implementation
 public:
 	virtual ~CStatisticListView();
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
-protected:
-
+public:
+	void InsertLine(int lineNumber, CString* str[4]);
 // Generated message map functions
 protected:
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);

@@ -42,34 +42,16 @@ BOOL CStatisticListView::PreCreateWindow(CREATESTRUCT& cs)
 	return CListView::PreCreateWindow(cs);
 }
 
-#define NUM_COLUMNS 4
-#define NUM_ITEMS   7
+#define NUM_COLUMNS 5
+
 static _TCHAR *_ColumnName[NUM_COLUMNS] =
-{
-	_T("FunctionName"), _T("Time"), _T("NetTime"), _T("Num Of Calls")
-};
+{_T("LineNumber"), _T("FunctionName"), _T("StartTime"), _T("FinishTime"), _T("RunTime")};
+
 static int _ColumnPlace[NUM_COLUMNS] =
-{
-	LVCFMT_LEFT, LVCFMT_CENTER,LVCFMT_CENTER, LVCFMT_CENTER
-};
+{LVCFMT_LEFT, LVCFMT_CENTER,LVCFMT_CENTER, LVCFMT_CENTER, LVCFMT_CENTER};
 
 static int _ColumnWidth[NUM_COLUMNS] =
-{
-	150, 75, 75, 100
-};
-
-static _TCHAR *_gszItem[NUM_ITEMS][NUM_COLUMNS] =
-{
-	_T("foo1"),  _T("255"), _T("255"), _T("0"),  
-	_T("foo2"),     _T("255"), _T("0"),   _T("0"), 
-	_T("foo3"),   _T("0"),   _T("255"), _T("0"),  
-	_T("foo4"), _T("255"), _T("0"),   _T("255"),
-	_T("foo5"),    _T("0"),   _T("255"), _T("255"),
-	_T("foo6"),    _T("0"),   _T("0"),   _T("255"),
-	_T("foo7"),    _T("192"), _T("192"), _T("192"), 
-};
-
-
+{70, 105, 130, 130, 105};
 
 void CStatisticListView::OnInitialUpdate()
 {
@@ -78,8 +60,8 @@ void CStatisticListView::OnInitialUpdate()
 	CListCtrl& ListCtrl = GetListCtrl();
 	ModifyStyle(0, LVS_REPORT);
 
-// building columns
-	int i, j;
+	// building columns
+	int i;
 	LV_COLUMN lvc;
 	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 	for(i = 0; i<NUM_COLUMNS; i++)
@@ -90,10 +72,8 @@ void CStatisticListView::OnInitialUpdate()
 		lvc.fmt = _ColumnPlace[i];
 		ListCtrl.InsertColumn(i,&lvc);
 	}
-	OnUpdate(NULL, NULL, NULL);
-	//this->Update();
-// insert items
-
+	// clean the table for further use
+	GetListCtrl().DeleteAllItems();
 }
 
 // CStatisticListView diagnostics
@@ -123,29 +103,23 @@ void CStatisticListView::OnStyleChanged(int /*nStyleType*/, LPSTYLESTRUCT /*lpSt
 	//TODO: add code to react to the user changing the view style of your window
 	Default();
 }
- void  CStatisticListView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
-{
-	GetListCtrl().DeleteAllItems();
-	LV_ITEM lvi;
-	for(int i = 0; i < 3; i++)
-	{
-		lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
-		lvi.iItem = i;
-		lvi.iSubItem = 0;
-		lvi.pszText = _gszItem[i][0];
-		lvi.iImage = i;
-		lvi.stateMask = LVIS_STATEIMAGEMASK;
-		lvi.state = INDEXTOSTATEIMAGEMASK(1);
 
-		GetListCtrl().InsertItem(&lvi);
-	}
-	LPCTSTR s = "12";
-	for(i = 0; i<3; i++)
-	{
-		for(int j = 1; j<NUM_COLUMNS; j++)
-		{
-			GetListCtrl().SetItemText(i,j,_gszItem[i][j]);
-		}
-	}
-	
+void CStatisticListView::InsertLine(int lineNumber, CString* str[NUM_COLUMNS-1])
+{
+	LV_ITEM lvi;
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
+	lvi.iItem = lineNumber;
+	lvi.iSubItem = 0;
+
+	char buf[100];
+	itoa(lineNumber, buf, 10);
+	lvi.pszText =  buf;
+
+	lvi.iImage = lineNumber;
+	lvi.stateMask = LVIS_STATEIMAGEMASK;
+	lvi.state = INDEXTOSTATEIMAGEMASK(1);
+	GetListCtrl().InsertItem(&lvi);
+
+	for(int j = 1; j<NUM_COLUMNS; j++)
+		GetListCtrl().SetItemText(lineNumber-1, j, *str[j-1]);
 }

@@ -31,7 +31,7 @@ public:
 #endif
 
 public:
-	void InsertLine(int lineNumber, CString *str);
+	void InsertLine(int lineNumber, CString *str, DWORD address);
 // Generated message map functions
 protected:
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
@@ -39,6 +39,9 @@ protected:
 public:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	virtual void OnInitialUpdate();
+	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 #ifndef _DEBUG  // debug version in StatisticListView.cpp

@@ -6,14 +6,13 @@
 #include <hash_map>
 #include "SymbolManager.h"
 
-struct FUNCTION_CALL_INFO {
-	unsigned int count;
-	DWORD64 time;
-};
-
-struct STATISTIC_LIST_INFO{
+struct STATISTIC_LIST_INFO
+{
+	DWORD address;
 	CString name;
 	CString time;
+	STATISTIC_LIST_INFO(DWORD address_, CString name_, CString time_)
+		: address(address_), name(name_), time(time_) {}
 };
 
 class CWinProfDoc;
@@ -53,8 +52,6 @@ public:
 #endif
 
 private:
-	typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
-	function_call_map_t function_call_map;
 
 // Generated message map functions
 protected:

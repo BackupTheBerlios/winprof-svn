@@ -111,6 +111,9 @@ void CFunctionTreeView::FillTheTree()
 	vector<RUN_INFO> stack;
 
 	DWORD64 freq = GetDocument()->m_Frequency;
+	function_call_map_t& function_call_map = static_cast<CMainFrame*>(AfxGetMainWnd())->function_call_map;
+
+	function_call_map.clear();
 
 	// build the infrastructure
 	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
@@ -129,18 +132,12 @@ void CFunctionTreeView::FillTheTree()
 
 			// insert into the tree a new node
 			CString name = GetDocument()->symbol_manager.GetSymName(call_info.address);
-			CString s; s.Format("%x", call_info.address);
-			if (!name.IsEmpty()) s = name + " (" + s + ")";
-			current = ctrl.InsertItem(s, current);
+			if (name.IsEmpty())
+				name.Format("%x", call_info.address);
+			current = ctrl.InsertItem(name, current);
 		} else {
-			#ifdef _DEBUG
 			// if the call log file is built properly this if is never entered
-			if(stack.back().address != call_info.address){
-				CString s;
-				s.Format("improper input file: %x %x\n", stack.back().address, call_info.address);
-				OutputDebugString(s);
-			}
-			#endif
+			ASSERT(stack.back().address == call_info.address);
 
 			// update the stack values
 			RUN_INFO& func = stack.back();
@@ -158,15 +155,11 @@ void CFunctionTreeView::FillTheTree()
 
 			// prepare information to be transferred to the table
 			CString name = GetDocument()->symbol_manager.GetSymName(func.address);
-			CString ad; ad.Format("%x", func.address);
-			if (!name.IsEmpty()) ad = name + " (" + ad + ")";
-			CString s3(dword64tostr(func.diff * 1000 / freq));
+			if (name.IsEmpty())
+				name.Format("%x", func.address);
+			CString time = dword64tostr(func.diff * 1000 / freq);
 
-			//insert static into the treeList
-			STATISTIC_LIST_INFO *sli = new STATISTIC_LIST_INFO();
-			sli->name = ad;
-			sli->time = s3;
-			ctrl.SetItemData(current, (DWORD_PTR)sli);
+			ctrl.SetItemData(current, (DWORD_PTR)new STATISTIC_LIST_INFO(func.address, name, time));
 
 			stack.pop_back();
 
@@ -237,7 +230,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 			STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hItem);
 			OutputDebugString(recieve->name);
 			CString str[]  = {recieve->name, recieve->time};
-			RightPane->InsertLine(++counter, str);
+			RightPane->InsertLine(++counter, str, recieve->address);
 		}
 
 		if (ctrl.ItemHasChildren(hItem))
@@ -250,7 +243,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 				STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hChildItem);
 				OutputDebugString(recieve->name);
 				CString str[]  = {recieve->name,recieve->time};
-				RightPane->InsertLine(++counter, str);
+				RightPane->InsertLine(++counter, str, recieve->address);
 			    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
 			}
 		}
@@ -265,9 +258,6 @@ void CFunctionTreeView::OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CTreeCtrl& ctrl = GetTreeCtrl();
 	HTREEITEM hItem = pNMTreeView->itemOld.hItem;
 	if (hItem != ctrl.GetRootItem())
-	{
-		STATISTIC_LIST_INFO *receive = (STATISTIC_LIST_INFO *)ctrl.GetItemData(pNMTreeView->itemOld.hItem);
-		delete receive;
-	}
+		delete (void *)pNMTreeView->itemOld.lParam;
 	*pResult = 0;
 }

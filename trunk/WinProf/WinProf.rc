@@ -176,6 +176,28 @@ BEGIN
                     12
 END
 
+IDD_STATISTICS_DIALOG DIALOGEX 0, 0, 193, 85
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Call Statistics"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Close",IDOK,71,64,50,14
+    CONTROL         "Address",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | 
+                    WS_GROUP,7,6,27,8
+    EDITTEXT        IDC_ADDRESS_EDIT,65,6,121,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    LTEXT           "Name",IDC_STATIC,7,20,19,8
+    LTEXT           "Call Count",IDC_STATIC,7,34,34,8
+    LTEXT           "Avg Run Time",IDC_STATIC,7,48,45,8
+    EDITTEXT        IDC_NAME_EDIT,65,20,121,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER
+    EDITTEXT        IDC_CALL_COUNT_EDIT,65,34,121,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+    EDITTEXT        IDC_AVG_RUNTIME_EDIT4,65,48,121,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -238,6 +260,14 @@ BEGIN
         RIGHTMARGIN, 133
         TOPMARGIN, 7
         BOTTOMMARGIN, 19
+    END
+
+    IDD_STATISTICS_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 186
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 78
     END
 END
 #endif    // APSTUDIO_INVOKED

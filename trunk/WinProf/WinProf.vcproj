@@ -135,6 +135,9 @@
 				RelativePath=".\StatisticListView.cpp">
 			</File>
 			<File
+				RelativePath=".\StatisticsDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -177,6 +180,9 @@
 			</File>
 			<File
 				RelativePath=".\StatisticListView.h">
+			</File>
+			<File
+				RelativePath=".\StatisticsDialog.h">
 			</File>
 			<File
 				RelativePath=".\stdafx.h">

@@ -19,7 +19,6 @@ IMPLEMENT_DYNCREATE(CStatisticListView, CListView)
 
 BEGIN_MESSAGE_MAP(CStatisticListView, CListView)
 	ON_WM_STYLECHANGED()
-//	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // CStatisticListView construction/destruction
@@ -58,7 +57,8 @@ void CStatisticListView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 	CListCtrl& ListCtrl = GetListCtrl();
-	ModifyStyle(0, LVS_REPORT);
+	ModifyStyle(0, LVS_REPORT | LVS_SINGLESEL);
+	ListCtrl.ModifyStyleEx(0, LVS_EX_FULLROWSELECT);
 
 	// building columns
 	int i;
@@ -104,7 +104,7 @@ void CStatisticListView::OnStyleChanged(int /*nStyleType*/, LPSTYLESTRUCT /*lpSt
 	Default();
 }
 
-void CStatisticListView::InsertLine(int lineNumber, CString* str[NUM_COLUMNS-1])
+void CStatisticListView::InsertLine(int lineNumber, CString str[NUM_COLUMNS-1])
 {
 	LV_ITEM lvi;
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
@@ -121,5 +121,5 @@ void CStatisticListView::InsertLine(int lineNumber, CString* str[NUM_COLUMNS-1])
 	GetListCtrl().InsertItem(&lvi);
 
 	for(int j = 1; j<NUM_COLUMNS; j++)
-		GetListCtrl().SetItemText(lineNumber-1, j, *str[j-1]);
+		GetListCtrl().SetItemText(lineNumber-1, j, str[j-1]);
 }

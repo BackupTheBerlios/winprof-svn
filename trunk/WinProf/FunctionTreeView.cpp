@@ -6,11 +6,15 @@
 
 #include "WinProfDoc.h"
 #include "FunctionTreeView.h"
-#include "../CallMon/CallMon.h"
+#include "..\CallMon\CallMon.h"
 #include "MainFrm.h"
 #include "StatisticListView.h"
 #include ".\functiontreeview.h"
-#include <vector> // alexeyd
+#include <vector>
+
+using namespace std;
+using namespace stdext;
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -98,19 +102,17 @@ void CFunctionTreeView::FillTheTree()
 	// place holders, line counter
 	CALL_INFO call_info;
 	RUN_INFO run_info;
-	INT counter = 0;
+	int counter = 0;
 
 	// open the intermediate log file
 	CFile f;
-	if(!f.Open("calllog2.prof", CFile::modeRead | CFile::shareDenyWrite)) 
+	if (!f.Open("calllog2.prof", CFile::modeRead | CFile::shareDenyWrite)) 
 		return;
 
-	// function_id -> (number of calls, average run time)
-	//map_type map();
-	std::vector<RUN_INFO> stack;
+	vector<RUN_INFO> stack;
 
 	// build the infrastructure
-	while(true) 
+	while (true) 
 	{
 		// read line from the intermediate call log file
 		int bytes_read = f.Read(&call_info, sizeof(CALL_INFO));
@@ -145,24 +147,25 @@ void CFunctionTreeView::FillTheTree()
 			#endif
 
 			// update the stack values
-			stack.back().finish = call_info.time;
-			stack.back().diff = stack.back().finish - stack.back().start;
+			RUN_INFO& func = stack.back();
+			func.finish = call_info.time;
+			func.diff = func.finish - func.start;
 
 			// collect statistics information about functions call
-			/* unsigned long addr = (unsigned long)call_info.address;
-			map_type::const_iterator iter = map.find(addr);
-			if (iter.begin() == iter.end()) {
-				map[addr] = info_type(0, 0);
+			DWORD addr = call_info.address;
+			function_call_map_t::const_iterator iter = function_call_map.find(addr);
+			if (iter == function_call_map.end()) {
+				function_call_map[addr] = FUNCTION_CALL_INFO();
 			}
-			map[addr].first++;
-			map[addr].second += stack.back().diff; */
+			function_call_map[addr].count++;
+			function_call_map[addr].time += func.diff;
 
 			// prepare information to be transferred to the table
-			CString ad; ad.Format("%ld", stack.back().address);
-			CString s1(dword64tostr(stack.back().start));
-			CString s2(dword64tostr(stack.back().finish));
-			CString s3(dword64tostr(stack.back().diff));
-			CString* str[4] = {&ad, &s1, &s2, &s3};
+			CString ad; ad.Format("%ld", func.address);
+			CString s1(dword64tostr(func.start));
+			CString s2(dword64tostr(func.finish));
+			CString s3(dword64tostr(func.diff));
+			CString str[] = {ad, s1, s2, s3};
 			(static_cast<CMainFrame*>(theApp.m_pMainWnd))->GetRightPane()->InsertLine(++counter, str);
 			stack.pop_back();
 

@@ -3,6 +3,13 @@
 
 #pragma once
 
+#include <hash_map>
+
+struct FUNCTION_CALL_INFO {
+	unsigned int count;
+	DWORD64 time;
+};
+
 class CWinProfDoc;
 
 typedef struct {
@@ -46,6 +53,10 @@ public:
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
 #endif
+
+private:
+	typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
+	function_call_map_t function_call_map;
 
 // Generated message map functions
 protected:

@@ -32,7 +32,7 @@ public:
 #endif
 
 public:
-	void InsertLine(int lineNumber, CString* str[4]);
+	void InsertLine(int lineNumber, CString *str);
 // Generated message map functions
 protected:
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);

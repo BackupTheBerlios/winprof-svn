@@ -2,22 +2,17 @@
 
 #include "stdafx.h"
 #include <hash_map>
+#include <list>
 #include <dbghelp.h>
-
-struct SYMBOL_INFORMATION
-{
-	CString name;
-	int module;
-	void Serialize(CArchive& ar);
-};
+#include "..\CallMon\CallMon.h"
 
 class CSymbolManager
 {
 	friend BOOL CALLBACK SymbolsCallback(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext);
 public:
-	CSymbolManager(HANDLE hProcess=0);
-	void SetProcess(HANDLE hProcess);
+	void SetProcess(HANDLE hProcess, const std::list<CALL_INFO>& call_info);
 	void Flush();
+	CSymbolManager();
 	~CSymbolManager(void);
 	CString GetSymName(DWORD dwAddress);
 	void Serialize(CArchive& ar);
@@ -28,8 +23,8 @@ private:
 	int nModCount;
 	CString GetModulesPaths();
 	void EnumModules();
-	void EnumSymbols();
+	void EnumSymbols(const std::list<CALL_INFO>& call_info);
 	
-	typedef stdext::hash_map<DWORD, SYMBOL_INFORMATION> symbol_map_t;
+	typedef stdext::hash_map<DWORD, CString> symbol_map_t;
 	symbol_map_t symbols;
 };

@@ -101,13 +101,6 @@ void CFunctionTreeView::FillTheTree()
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
 
-/*	HTREEITEM roo = ctrl.GetRootItem();
-	if(roo != NULL)
-	{
-		MessageBox("Ok");
-		Delete_All_Items(ctrl.GetChildItem(roo));
-	}*/
-
 	ctrl.DeleteAllItems();
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
 	
@@ -221,7 +214,7 @@ void CFunctionTreeView::OnCommandsStart()
 		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
 	}
 
-	GetDocument()->symbol_manager.SetProcess(hProcess);
+	GetDocument()->symbol_manager.SetProcess(hProcess, GetDocument()->call_info);
 
 	FillTheTree();
 }

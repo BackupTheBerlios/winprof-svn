@@ -7,35 +7,23 @@
 using namespace std;
 using namespace stdext;
 
-void SYMBOL_INFORMATION::Serialize(CArchive& ar)
-{
-	if (ar.IsStoring())
-	{
-		ar << name << module;
-	}
-	else
-	{
-		ar >> name >> module;
-	}
-}
+CSymbolManager::CSymbolManager()
+	: hProcess(NULL), hModules(NULL), szModPath(NULL), nModCount(0)
+{}
 
-CSymbolManager::CSymbolManager(HANDLE hProcess_)
-	: hProcess(hProcess_), hModules(NULL), szModPath(NULL), nModCount(0)
-{
-	SetProcess(hProcess_);
-}
-
-void CSymbolManager::SetProcess(HANDLE hProcess)
+void CSymbolManager::SetProcess(HANDLE hProcess, const list<CALL_INFO>& call_info)
 {
 	if (hProcess == NULL) return;
 	this->hProcess = hProcess;
+	hModules = NULL;
+	szModPath = NULL;
 	SymSetOptions(SYMOPT_UNDNAME | SYMOPT_LOAD_LINES | SYMOPT_DEFERRED_LOADS);
 	EnumModules();
 	CString path = GetModulesPaths();
 	char *p = path.GetBuffer();
 	SymInitialize(hProcess, p, TRUE);
 	path.ReleaseBuffer();
-	EnumSymbols();
+	EnumSymbols(call_info);
 }
 
 void CSymbolManager::Flush()
@@ -102,60 +90,41 @@ CString CSymbolManager::GetSymName(DWORD dwAddress)
 {
 	symbol_map_t::const_iterator iter = symbols.find(dwAddress);
 	if (iter == symbols.end()) return CString();
-	return iter->second.name;
+	return iter->second;
 }
 
-BOOL CALLBACK SymbolsCallback(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID UserContext)
-{
-	pair<void *, int> *p = reinterpret_cast<pair<void *, int> *>(UserContext);
-	CSymbolManager *symman = reinterpret_cast<CSymbolManager *>(p->first);
-	SYMBOL_INFORMATION syminfo;
-	syminfo.name = pSymInfo->Name;
-	syminfo.module = p->second;
-	symman->symbols[(DWORD)pSymInfo->Address] = syminfo;
-	return TRUE;
-}
-
-void CSymbolManager::EnumSymbols()
+void CSymbolManager::EnumSymbols(const list<CALL_INFO>& call_info)
 {
 	if (hProcess == NULL) return;
-	for (int i=0; i<nModCount; i++)
-	{
-		pair<void *, int> p(this, i);
-		SymEnumSymbols(hProcess, (ULONG64)hModules[i], NULL, SymbolsCallback, &p);
-	}
+	DWORD disp;
+	char buf[sizeof(IMAGEHLP_SYMBOL) + MAX_SYM_NAME];
+	IMAGEHLP_SYMBOL *sym = reinterpret_cast<IMAGEHLP_SYMBOL*>(buf);
+	sym->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL);
+	sym->MaxNameLength = MAX_SYM_NAME;
+	for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
+		if (symbols.find(iter->address) == symbols.end())
+			if (SymGetSymFromAddr(hProcess, iter->address, &disp, sym))
+				symbols[iter->address] = sym->Name;
 }
 
 void CSymbolManager::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
-		ar << nModCount;
-		for (int i=0; i<nModCount; i++)
-			ar << szModPath[i];
 		ar << (unsigned int)symbols.size();
 		for (symbol_map_t::iterator iter = symbols.begin(); iter != symbols.end(); ++iter)
-		{
-			ar << iter->first;
-			iter->second.Serialize(ar);
-		}
+			ar << iter->first << iter->second;
 	}
 	else
 	{
-		ar >> nModCount;
-		if (szModPath) delete [] szModPath;
-		szModPath = new CString [nModCount];
-		for (int i=0; i<nModCount; i++)
-			ar >> szModPath[i];
 		unsigned int size;
 		ar >> size;
 		while (size--)
 		{
 			DWORD address;
-			SYMBOL_INFORMATION si;
-			ar >> address;
-			si.Serialize(ar);
-			symbols[address] = si;
+			CString name;
+			ar >> address >> name;
+			symbols[address] = name;
 		}
 	}
 }

@@ -250,7 +250,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDR_MAINFRAME           "WinProf++\n\nWinProf++\n\n\nWinProf.Document\nWinProf++.Document"
+    IDR_MAINFRAME           "WinProf++\n\nWinProf++\nWinProf++ Files (*.prof)\n.prof\nWinProf.Document\nWinProf++.Document"
 END
 
 STRINGTABLE 

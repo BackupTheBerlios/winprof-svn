@@ -33,6 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="dbghelp.lib psapi.lib"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -149,6 +150,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\SymbolManager.cpp">
+			</File>
+			<File
 				RelativePath=".\WinProf.cpp">
 			</File>
 			<File
@@ -173,6 +177,9 @@
 			</File>
 			<File
 				RelativePath=".\stdafx.h">
+			</File>
+			<File
+				RelativePath=".\SymbolManager.h">
 			</File>
 			<File
 				RelativePath=".\WinProf.h">

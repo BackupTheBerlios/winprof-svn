@@ -4,6 +4,7 @@
 #pragma once
 
 #include <hash_map>
+#include "SymbolManager.h"
 
 struct FUNCTION_CALL_INFO {
 	unsigned int count;
@@ -49,6 +50,7 @@ public:
 private:
 	typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
 	function_call_map_t function_call_map;
+	CSymbolManager symbol_manager;
 
 // Generated message map functions
 protected:

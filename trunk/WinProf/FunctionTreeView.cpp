@@ -9,6 +9,7 @@
 #include "..\CallMon\CallMon.h"
 #include "MainFrm.h"
 #include "StatisticListView.h"
+#include "SymbolManager.h"
 #include ".\functiontreeview.h"
 #include <vector>
 
@@ -133,8 +134,9 @@ void CFunctionTreeView::FillTheTree()
 			stack.push_back(run_info);
 
 			// insert into the tree a new node
-			CString s;
-			s.Format("%x", call_info.address);
+			CString name = symbol_manager.GetSymName(call_info.address);
+			CString s; s.Format("%x", call_info.address);
+			if (!name.IsEmpty()) s = name + " (" + s + ")";
 			current = ctrl.InsertItem(s, current);
 		} else {
 			#ifdef _DEBUG
@@ -161,7 +163,9 @@ void CFunctionTreeView::FillTheTree()
 			function_call_map[addr].time += func.diff;
 
 			// prepare information to be transferred to the table
+			CString name = symbol_manager.GetSymName(func.address);
 			CString ad; ad.Format("%x", func.address);
+			if (!name.IsEmpty()) ad = name + " (" + ad + ")";
 			CString s1(dword64tostr(func.start));
 			CString s2(dword64tostr(func.finish));
 			CString s3(dword64tostr(func.diff));
@@ -179,5 +183,35 @@ void CFunctionTreeView::FillTheTree()
 void CFunctionTreeView::OnCommandsStart()
 {
 	// TODO: Add your command handler code here
+	PROCESS_INFORMATION info;
+	STARTUPINFO si;
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	if (!CreateProcess("..\\test\\Debug\\test.exe", NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
+	{
+		MessageBox("can't create process");
+		return;
+	}
+	BOOL stop = FALSE;
+	HANDLE hProcess = info.hProcess;
+
+	while (!stop)
+	{
+		DEBUG_EVENT event;
+		WaitForDebugEvent(&event, INFINITE);
+		switch (event.dwDebugEventCode)
+		{
+			case EXCEPTION_DEBUG_EVENT:
+				switch (event.u.Exception.ExceptionRecord.ExceptionCode)
+				{
+					case EXCEPTION_BREAKPOINT:
+						stop=TRUE;
+						break;
+				}
+		}
+		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
+	}
+
+	symbol_manager.SetProcess(hProcess);
 	FillTheTree();
 }

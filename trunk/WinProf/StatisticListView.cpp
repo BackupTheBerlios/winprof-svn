@@ -45,7 +45,7 @@ BOOL CStatisticListView::PreCreateWindow(CREATESTRUCT& cs)
 #define NUM_COLUMNS 3
 
 static _TCHAR *_ColumnName[NUM_COLUMNS] =
-{_T("#"), _T("Function Name"), _T("Run Time")};
+{_T("#"), _T("Function Name"), _T("Run Time (ms)")};
 
 static int _ColumnPlace[NUM_COLUMNS] =
 {LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT};
@@ -133,5 +133,4 @@ void CStatisticListView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 	// TODO: Add your specialized code here and/or call the base class
-//	GetListCtrl().DeleteAllItems();
 }

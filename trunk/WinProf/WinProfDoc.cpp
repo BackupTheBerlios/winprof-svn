@@ -57,7 +57,7 @@ void CWinProfDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
-		ar << m_ExeFileName;
+		ar << m_ExeFileName << m_Frequency;
 		symbol_manager.Serialize(ar);
 		ar << (unsigned int)call_info.size();
 		for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
@@ -65,7 +65,7 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	}
 	else
 	{
-		ar >> m_ExeFileName;
+		ar >> m_ExeFileName >> m_Frequency;
 		symbol_manager.Serialize(ar);
 		unsigned int size;
 		CALL_INFO ci;
@@ -76,7 +76,6 @@ void CWinProfDoc::Serialize(CArchive& ar)
 			ar.Read(&ci, sizeof(CALL_INFO));
 			call_info.push_back(ci);
 		}
-//		UpdateAllViews(NULL, 1);
 	}
 }
 

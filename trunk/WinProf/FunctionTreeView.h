@@ -64,6 +64,7 @@ public:
 protected:
 public:
 	afx_msg void OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 #ifndef _DEBUG  // debug version in FunctionTreeView.cpp

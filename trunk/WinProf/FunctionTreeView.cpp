@@ -28,6 +28,7 @@ IMPLEMENT_DYNCREATE(CFunctionTreeView, CTreeView)
 
 BEGIN_MESSAGE_MAP(CFunctionTreeView, CTreeView)
 	ON_NOTIFY_REFLECT(TVN_SELCHANGED, OnTvnSelchanged)
+	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnTvnDeleteitem)
 END_MESSAGE_MAP()
 
 
@@ -83,6 +84,8 @@ CWinProfDoc* CFunctionTreeView::GetDocument() // non-debug version is inline
 
 CString CFunctionTreeView::dword64tostr(DWORD64 x) 
 {
+	if (x == 0) return "0";
+
 	CString s;
 	while (x)
 	{
@@ -97,6 +100,14 @@ void CFunctionTreeView::FillTheTree()
 {
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
+
+/*	HTREEITEM roo = ctrl.GetRootItem();
+	if(roo != NULL)
+	{
+		MessageBox("Ok");
+		Delete_All_Items(ctrl.GetChildItem(roo));
+	}*/
+
 	ctrl.DeleteAllItems();
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
 	
@@ -105,6 +116,8 @@ void CFunctionTreeView::FillTheTree()
 	int counter = 0;
 
 	vector<RUN_INFO> stack;
+
+	DWORD64 freq = GetDocument()->m_Frequency;
 
 	// build the infrastructure
 	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
@@ -154,7 +167,7 @@ void CFunctionTreeView::FillTheTree()
 			CString name = GetDocument()->symbol_manager.GetSymName(func.address);
 			CString ad; ad.Format("%x", func.address);
 			if (!name.IsEmpty()) ad = name + " (" + ad + ")";
-			CString s3(dword64tostr(func.diff));
+			CString s3(dword64tostr(func.diff * 1000 / freq));
 
 			//insert static into the treeList
 			STATISTIC_LIST_INFO *sli = new STATISTIC_LIST_INFO();
@@ -240,14 +253,28 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 
 			HTREEITEM hChildItem = ctrl.GetChildItem(hItem);
 			while (hChildItem != NULL)
-				{
-					STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hChildItem);
-					OutputDebugString(recieve->name);
-					CString str[]  = {recieve->name,recieve->time};
-					RightPane->InsertLine(++counter, str);
-				    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
-				}
+			{
+				STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hChildItem);
+				OutputDebugString(recieve->name);
+				CString str[]  = {recieve->name,recieve->time};
+				RightPane->InsertLine(++counter, str);
+			    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
+			}
 		}
 	}
 	if (pResult) *pResult = 0;
+}
+
+void CFunctionTreeView::OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	CTreeCtrl& ctrl = GetTreeCtrl();
+	HTREEITEM hItem = pNMTreeView->itemOld.hItem;
+	if (hItem != ctrl.GetRootItem())
+	{
+		STATISTIC_LIST_INFO *receive = (STATISTIC_LIST_INFO *)ctrl.GetItemData(pNMTreeView->itemOld.hItem);
+		delete receive;
+	}
+	*pResult = 0;
 }

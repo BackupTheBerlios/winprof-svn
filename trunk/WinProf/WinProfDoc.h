@@ -18,6 +18,7 @@ public:
 	CSymbolManager symbol_manager;
 	CString m_ExeFileName;
 	std::list<CALL_INFO> call_info;
+	DWORD64 m_Frequency;
 
 // Operations
 public:

@@ -272,6 +272,9 @@ void CMainFrame::OnProjectOpenExe()
 	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
 	GetLeftPane()->GetDocument()->ReadCallLog(calllog_filename);
 	CFile::Remove(calllog_filename);
+	LARGE_INTEGER freq;
+	QueryPerformanceFrequency(&freq);
+	GetLeftPane()->GetDocument()->m_Frequency = (DWORD64)freq.QuadPart;
 
 	GetLeftPane()->OnCommandsStart();
 	GetLeftPane()->GetDocument()->SetModifiedFlag();

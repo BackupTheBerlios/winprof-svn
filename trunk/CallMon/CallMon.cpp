@@ -32,7 +32,19 @@ static std::vector<CALL_INFO> call_info;
 
 static void LogToFile()
 {
-	HANDLE hFile = CreateFile("calllog.prof", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
+	static TCHAR szTempPath[MAX_PATH];
+	static bool FirstTime = true;
+	HANDLE hFile;
+	if (FirstTime)
+	{
+		TCHAR temp[MAX_PATH];
+		GetTempPath(MAX_PATH, temp);
+		wsprintf(szTempPath, "%scalllog.%d", temp, GetCurrentProcessId());
+		FirstTime = false;
+		hFile = CreateFile(szTempPath, GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, 0, NULL);
+	}
+	else
+		hFile = CreateFile(szTempPath, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, 0, NULL);
 	if (hFile == NULL)
 	{
 		MessageBox(NULL, "Couldn't open file calllog.prof", "WinProf++", MB_ICONERROR | MB_OK);

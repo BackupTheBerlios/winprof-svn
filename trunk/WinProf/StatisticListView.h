@@ -21,7 +21,6 @@ public:
 	public:
 virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 public:
-	virtual void OnInitialUpdate(); // called first time after construct
 
 // Implementation
 public:
@@ -38,7 +37,8 @@ protected:
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);
 	DECLARE_MESSAGE_MAP()
 public:
-//	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	virtual void OnInitialUpdate();
 };
 
 #ifndef _DEBUG  // debug version in StatisticListView.cpp

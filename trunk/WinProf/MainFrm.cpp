@@ -260,9 +260,17 @@ void CMainFrame::OnProjectOpenExe()
 		MessageBox("can't create process");
 		return;
 	}
+
+	TCHAR temp[MAX_PATH];
+	GetTempPath(MAX_PATH, temp);
+	CString calllog_filename;
+	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
+	GetLeftPane()->SetCallLogFileName(calllog_filename);
+
 	CWaitTerminationDialog dlg(info.hProcess);
 	dlg.DoModal();
+	CloseHandle(info.hThread);
 	CloseHandle(info.hProcess);
-	MessageBox("ss");
 	GetLeftPane()->OnCommandsStart();
+	GetLeftPane()->GetDocument()->SetModifiedFlag();
 }

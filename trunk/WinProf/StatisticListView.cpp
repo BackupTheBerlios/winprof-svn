@@ -19,6 +19,7 @@ IMPLEMENT_DYNCREATE(CStatisticListView, CListView)
 
 BEGIN_MESSAGE_MAP(CStatisticListView, CListView)
 	ON_WM_STYLECHANGED()
+	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 // CStatisticListView construction/destruction
@@ -51,30 +52,6 @@ static int _ColumnPlace[NUM_COLUMNS] =
 
 static int _ColumnWidth[NUM_COLUMNS] =
 {70, 105, 130, 130, 105};
-
-void CStatisticListView::OnInitialUpdate()
-{
-	CListView::OnInitialUpdate();
-
-	CListCtrl& ListCtrl = GetListCtrl();
-	ModifyStyle(LVS_TYPEMASK, LVS_REPORT | LVS_SINGLESEL);
-	ListCtrl.SetExtendedStyle(ListCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
-
-	// building columns
-	int i;
-	LV_COLUMN lvc;
-	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-	for(i = 0; i<NUM_COLUMNS; i++)
-	{
-		lvc.iSubItem = i;
-		lvc.pszText = _ColumnName[i];
-		lvc.cx = _ColumnWidth[i];
-		lvc.fmt = _ColumnPlace[i];
-		ListCtrl.InsertColumn(i,&lvc);
-	}
-	// clean the table for further use
-	GetListCtrl().DeleteAllItems();
-}
 
 // CStatisticListView diagnostics
 
@@ -122,4 +99,39 @@ void CStatisticListView::InsertLine(int lineNumber, CString str[NUM_COLUMNS-1])
 
 	for(int j = 1; j<NUM_COLUMNS; j++)
 		GetListCtrl().SetItemText(lineNumber-1, j, str[j-1]);
+}
+
+int CStatisticListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CListView::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	// TODO:  Add your specialized creation code here
+	CListCtrl& ListCtrl = GetListCtrl();
+	ModifyStyle(LVS_TYPEMASK, LVS_REPORT | LVS_SINGLESEL);
+	ListCtrl.SetExtendedStyle(ListCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
+
+	// building columns
+	int i;
+	LV_COLUMN lvc;
+	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
+	for(i = 0; i<NUM_COLUMNS; i++)
+	{
+		lvc.iSubItem = i;
+		lvc.pszText = _ColumnName[i];
+		lvc.cx = _ColumnWidth[i];
+		lvc.fmt = _ColumnPlace[i];
+		ListCtrl.InsertColumn(i,&lvc);
+	}
+	// clean the table for further use
+
+	return 0;
+}
+
+void CStatisticListView::OnInitialUpdate()
+{
+	CListView::OnInitialUpdate();
+
+	// TODO: Add your specialized code here and/or call the base class
+	GetListCtrl().DeleteAllItems();
 }

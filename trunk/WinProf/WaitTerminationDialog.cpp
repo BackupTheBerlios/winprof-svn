@@ -36,7 +36,7 @@ UINT ThreadFunc(LPVOID pParam)
 {
 	CWaitTerminationDialog *dlg = (CWaitTerminationDialog *)pParam;
 	WaitForSingleObject(dlg->GetProcess(), INFINITE);
-	dlg->OnCancel();
+	dlg->PostMessage(WM_CLOSE);
 	return 0;
 }
 

@@ -56,6 +56,7 @@ void CFunctionTreeView::OnInitialUpdate()
 
 	// TODO: You may populate your TreeView with items by directly accessing
 	// its tree control through a call to GetTreeCtrl().
+	GetTreeCtrl().DeleteAllItems();
 }
 
 
@@ -79,8 +80,6 @@ CWinProfDoc* CFunctionTreeView::GetDocument() // non-debug version is inline
 }
 #endif //_DEBUG
 
-// this function is already defined in CallMon, didn't succeed to use the version
-// alexeyd
 CString CFunctionTreeView::dword64tostr(DWORD64 x) 
 {
 	CString s;
@@ -91,6 +90,11 @@ CString CFunctionTreeView::dword64tostr(DWORD64 x)
 	}
 	s.MakeReverse();
 	return s;
+}
+
+void CFunctionTreeView::SetCallLogFileName(CString filename)
+{
+	calllog_filename = filename;
 }
 
 void CFunctionTreeView::FillTheTree()
@@ -106,7 +110,7 @@ void CFunctionTreeView::FillTheTree()
 
 	// open the intermediate log file
 	CFile f;
-	if (!f.Open("calllog.prof", CFile::modeRead | CFile::shareDenyWrite)) 
+	if (!f.Open(calllog_filename, CFile::modeRead | CFile::shareDenyWrite)) 
 		return;
 
 	vector<RUN_INFO> stack;
@@ -169,7 +173,7 @@ void CFunctionTreeView::FillTheTree()
 			CString s2(dword64tostr(func.finish));
 			CString s3(dword64tostr(func.diff));
 			CString str[] = {ad, s1, s2, s3};
-			(static_cast<CMainFrame*>(theApp.m_pMainWnd))->GetRightPane()->InsertLine(++counter, str);
+			static_cast<CMainFrame*>(AfxGetMainWnd())->GetRightPane()->InsertLine(++counter, str);
 			stack.pop_back();
 
 			current = ctrl.GetParentItem(current);

@@ -7,6 +7,9 @@
 #include "MainFrm.h"
 #include "FunctionTreeView.h"
 #include "StatisticListView.h"
+#include "WinProfDoc.h"
+#include "WaitTerminationDialog.h"
+#include ".\mainfrm.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -21,6 +24,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_UPDATE_COMMAND_UI_RANGE(AFX_ID_VIEW_MINIMUM, AFX_ID_VIEW_MAXIMUM, OnUpdateViewStyles)
 	ON_COMMAND_RANGE(AFX_ID_VIEW_MINIMUM, AFX_ID_VIEW_MAXIMUM, OnViewStyle)
+	ON_COMMAND(ID_PROJECT_OPENEXE, OnProjectOpenExe)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -121,6 +125,13 @@ CStatisticListView* CMainFrame::GetRightPane()
 {
 	CWnd* pWnd = m_wndSplitter.GetPane(0, 1);
 	CStatisticListView* pView = DYNAMIC_DOWNCAST(CStatisticListView, pWnd);
+	return pView;
+}
+
+CFunctionTreeView* CMainFrame::GetLeftPane()
+{
+	CWnd* pWnd = m_wndSplitter.GetPane(0, 0);
+	CFunctionTreeView* pView = DYNAMIC_DOWNCAST(CFunctionTreeView, pWnd);
 	return pView;
 }
 
@@ -230,4 +241,28 @@ void CMainFrame::OnViewStyle(UINT nCommandID)
 		if (dwStyle != -1)
 			pView->ModifyStyle(LVS_TYPEMASK, dwStyle);
 	}
+}
+
+void CMainFrame::OnProjectOpenExe()
+{
+	// TODO: Add your command handler code here
+	CFileDialog fd(TRUE, _T("exe"), NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST, _T("Programs (*.exe)|*.exe|All Files (*.*)|*.*||"));
+	if (fd.DoModal() == IDCANCEL) return;
+	CString filename = fd.GetPathName();
+	GetLeftPane()->GetDocument()->m_ExeFileName = filename;
+
+	PROCESS_INFORMATION info;
+	STARTUPINFO si;
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	if (!CreateProcess(filename, NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &info))
+	{
+		MessageBox("can't create process");
+		return;
+	}
+	CWaitTerminationDialog dlg(info.hProcess);
+	dlg.DoModal();
+	CloseHandle(info.hProcess);
+	MessageBox("ss");
+	GetLeftPane()->OnCommandsStart();
 }

@@ -5,6 +5,7 @@
 #include "WinProf.h"
 
 #include "WinProfDoc.h"
+#include ".\winprofdoc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -22,6 +23,7 @@ END_MESSAGE_MAP()
 // CWinProfDoc construction/destruction
 
 CWinProfDoc::CWinProfDoc()
+: m_ExeFileName(_T(""))
 {
 	// TODO: add one-time construction code here
 

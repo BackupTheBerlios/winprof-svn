@@ -153,6 +153,9 @@
 				RelativePath=".\SymbolManager.cpp">
 			</File>
 			<File
+				RelativePath=".\WaitTerminationDialog.cpp">
+			</File>
+			<File
 				RelativePath=".\WinProf.cpp">
 			</File>
 			<File
@@ -180,6 +183,9 @@
 			</File>
 			<File
 				RelativePath=".\SymbolManager.h">
+			</File>
+			<File
+				RelativePath=".\WaitTerminationDialog.h">
 			</File>
 			<File
 				RelativePath=".\WinProf.h">

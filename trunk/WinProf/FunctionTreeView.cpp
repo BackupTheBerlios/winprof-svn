@@ -27,7 +27,6 @@ using namespace stdext;
 IMPLEMENT_DYNCREATE(CFunctionTreeView, CTreeView)
 
 BEGIN_MESSAGE_MAP(CFunctionTreeView, CTreeView)
-	ON_COMMAND(ID_COMMANDS_START, OnCommandsStart)
 END_MESSAGE_MAP()
 
 
@@ -107,7 +106,7 @@ void CFunctionTreeView::FillTheTree()
 
 	// open the intermediate log file
 	CFile f;
-	if (!f.Open("calllog2.prof", CFile::modeRead | CFile::shareDenyWrite)) 
+	if (!f.Open("calllog.prof", CFile::modeRead | CFile::shareDenyWrite)) 
 		return;
 
 	vector<RUN_INFO> stack;
@@ -183,11 +182,12 @@ void CFunctionTreeView::FillTheTree()
 void CFunctionTreeView::OnCommandsStart()
 {
 	// TODO: Add your command handler code here
+
 	PROCESS_INFORMATION info;
 	STARTUPINFO si;
 	memset(&si, 0, sizeof(si));
 	si.cb = sizeof(si);
-	if (!CreateProcess("..\\test\\Debug\\test.exe", NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
+	if (!CreateProcess(GetDocument()->m_ExeFileName, NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
 	{
 		MessageBox("can't create process");
 		return;
@@ -213,5 +213,6 @@ void CFunctionTreeView::OnCommandsStart()
 	}
 
 	symbol_manager.SetProcess(hProcess);
+
 	FillTheTree();
 }

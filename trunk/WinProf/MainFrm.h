@@ -5,6 +5,7 @@
 #pragma once
 
 class CStatisticListView;
+class CFunctionTreeView;
 class CMainFrame : public CFrameWnd
 {
 	
@@ -29,6 +30,7 @@ public:
 public:
 	virtual ~CMainFrame();
 	CStatisticListView* GetRightPane();
+	CFunctionTreeView* GetLeftPane();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -44,6 +46,8 @@ protected:
 	afx_msg void OnUpdateViewStyles(CCmdUI* pCmdUI);
 	afx_msg void OnViewStyle(UINT nCommandID);
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnProjectOpenExe();
 };
 
 

@@ -34,6 +34,8 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+	CString m_ExeFileName;
 };
 
 

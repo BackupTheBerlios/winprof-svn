@@ -42,16 +42,16 @@ BOOL CStatisticListView::PreCreateWindow(CREATESTRUCT& cs)
 	return CListView::PreCreateWindow(cs);
 }
 
-#define NUM_COLUMNS 5
+#define NUM_COLUMNS 3
 
 static _TCHAR *_ColumnName[NUM_COLUMNS] =
-{_T("LineNumber"), _T("FunctionName"), _T("StartTime"), _T("FinishTime"), _T("RunTime")};
+{_T("#"), _T("Function Name"), _T("Run Time")};
 
 static int _ColumnPlace[NUM_COLUMNS] =
-{LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT};
+{LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT};
 
 static int _ColumnWidth[NUM_COLUMNS] =
-{70, 105, 130, 130, 105};
+{70, 250, 100};
 
 // CStatisticListView diagnostics
 
@@ -133,5 +133,5 @@ void CStatisticListView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 	// TODO: Add your specialized code here and/or call the base class
-	GetListCtrl().DeleteAllItems();
+//	GetListCtrl().DeleteAllItems();
 }

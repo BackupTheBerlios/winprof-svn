@@ -83,7 +83,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT /*lpcs*/,
 	if (!m_wndSplitter.CreateStatic(this, 1, 2))
 		return FALSE;
 
-	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(100, 100), pContext) ||
+	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(230, 100), pContext) ||
 		!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CStatisticListView), CSize(100, 100), pContext))
 	{
 		m_wndSplitter.DestroyWindow();
@@ -271,9 +271,8 @@ void CMainFrame::OnProjectOpenExe()
 	CString calllog_filename;
 	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
 	GetLeftPane()->GetDocument()->ReadCallLog(calllog_filename);
+	CFile::Remove(calllog_filename);
 
 	GetLeftPane()->OnCommandsStart();
 	GetLeftPane()->GetDocument()->SetModifiedFlag();
-	
-	GetMenu()->GetSubMenu(3)->EnableMenuItem(ID_PROJECT_OPENEXE, MF_DISABLED | MF_GRAYED | MF_BYCOMMAND);
 }

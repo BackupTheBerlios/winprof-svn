@@ -27,6 +27,7 @@ using namespace stdext;
 IMPLEMENT_DYNCREATE(CFunctionTreeView, CTreeView)
 
 BEGIN_MESSAGE_MAP(CFunctionTreeView, CTreeView)
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, OnTvnSelchanged)
 END_MESSAGE_MAP()
 
 
@@ -52,11 +53,10 @@ void CFunctionTreeView::OnInitialUpdate()
 {
 	CTreeView::OnInitialUpdate();
 	
-	GetTreeCtrl().ModifyStyle(NULL,	TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT);
+	GetTreeCtrl().ModifyStyle(NULL,	TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS);
 
 	// TODO: You may populate your TreeView with items by directly accessing
 	// its tree control through a call to GetTreeCtrl().
-	GetTreeCtrl().DeleteAllItems();
 	FillTheTree();
 }
 
@@ -93,16 +93,12 @@ CString CFunctionTreeView::dword64tostr(DWORD64 x)
 	return s;
 }
 
-void CFunctionTreeView::SetCallLogFileName(CString filename)
-{
-	calllog_filename = filename;
-}
-
 void CFunctionTreeView::FillTheTree()
 {
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
-	HTREEITEM root = TVI_ROOT/*ctrl.InsertItem("root",TVI_ROOT)*/, current = root;
+	ctrl.DeleteAllItems();
+	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
 	
 	// place holders, line counter
 	RUN_INFO run_info;
@@ -158,16 +154,23 @@ void CFunctionTreeView::FillTheTree()
 			CString name = GetDocument()->symbol_manager.GetSymName(func.address);
 			CString ad; ad.Format("%x", func.address);
 			if (!name.IsEmpty()) ad = name + " (" + ad + ")";
-			CString s1(dword64tostr(func.start));
-			CString s2(dword64tostr(func.finish));
 			CString s3(dword64tostr(func.diff));
-			CString str[] = {ad, s1, s2, s3};
-			static_cast<CMainFrame*>(AfxGetMainWnd())->GetRightPane()->InsertLine(++counter, str);
+
+			//insert static into the treeList
+			STATISTIC_LIST_INFO *sli = new STATISTIC_LIST_INFO();
+			sli->name = ad;
+			sli->time = s3;
+			ctrl.SetItemData(current, (DWORD_PTR)sli);
+
 			stack.pop_back();
 
 			current = ctrl.GetParentItem(current);
 		}
 	}
+	
+	ctrl.SelectItem(root);
+	ctrl.Expand(root, TVE_EXPAND);
+	OnTvnSelchanged(NULL, NULL);
 }
 
 // CFunctionTreeView message handlers
@@ -208,4 +211,43 @@ void CFunctionTreeView::OnCommandsStart()
 	GetDocument()->symbol_manager.SetProcess(hProcess);
 
 	FillTheTree();
+}
+
+void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: Add your control notification handler code here
+	CTreeCtrl& ctrl = GetTreeCtrl(); 
+	HTREEITEM hItem = ctrl.GetSelectedItem();
+	CStatisticListView *RightPane = static_cast<CMainFrame*>(AfxGetMainWnd())->GetRightPane();
+	RightPane->GetListCtrl().DeleteAllItems();
+	int counter = 0;
+
+	if (hItem != NULL)
+	{
+
+		if (hItem != ctrl.GetRootItem())
+		{
+			STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hItem);
+			OutputDebugString(recieve->name);
+			CString str[]  = {recieve->name, recieve->time};
+			RightPane->InsertLine(++counter, str);
+		}
+
+		if (ctrl.ItemHasChildren(hItem))
+		{
+			ctrl.EnsureVisible(hItem);
+
+			HTREEITEM hChildItem = ctrl.GetChildItem(hItem);
+			while (hChildItem != NULL)
+				{
+					STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hChildItem);
+					OutputDebugString(recieve->name);
+					CString str[]  = {recieve->name,recieve->time};
+					RightPane->InsertLine(++counter, str);
+				    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
+				}
+		}
+	}
+	if (pResult) *pResult = 0;
 }

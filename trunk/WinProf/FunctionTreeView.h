@@ -11,6 +11,11 @@ struct FUNCTION_CALL_INFO {
 	DWORD64 time;
 };
 
+struct STATISTIC_LIST_INFO{
+	CString name;
+	CString time;
+};
+
 class CWinProfDoc;
 
 typedef struct {
@@ -42,7 +47,6 @@ protected:
 // Implementation
 public:
 	virtual ~CFunctionTreeView();
-	void SetCallLogFileName(CString filename);
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -51,7 +55,6 @@ public:
 private:
 	typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
 	function_call_map_t function_call_map;
-	CString calllog_filename;
 
 // Generated message map functions
 protected:
@@ -59,6 +62,8 @@ protected:
 public:
 	afx_msg void OnCommandsStart();
 protected:
+public:
+	afx_msg void OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 #ifndef _DEBUG  // debug version in FunctionTreeView.cpp

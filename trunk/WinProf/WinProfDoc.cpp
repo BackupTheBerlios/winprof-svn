@@ -11,6 +11,7 @@
 #define new DEBUG_NEW
 #endif
 
+using namespace std;
 
 // CWinProfDoc
 
@@ -40,6 +41,9 @@ BOOL CWinProfDoc::OnNewDocument()
 
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
+	m_ExeFileName.Empty();
+	symbol_manager.Flush();
+	call_info.clear();
 
 	return TRUE;
 }
@@ -53,13 +57,38 @@ void CWinProfDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
 	{
-		// TODO: add storing code here
+		ar << m_ExeFileName;
+		symbol_manager.Serialize(ar);
+		ar << (unsigned int)call_info.size();
+		for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
+			ar.Write(&*iter, sizeof(CALL_INFO));
 	}
 	else
 	{
-		// TODO: add loading code here
+		ar >> m_ExeFileName;
+		symbol_manager.Serialize(ar);
+		unsigned int size;
+		CALL_INFO ci;
+		ar >> size;
+		call_info.clear();
+		while (size--)
+		{
+			ar.Read(&ci, sizeof(CALL_INFO));
+			call_info.push_back(ci);
+		}
+//		UpdateAllViews(NULL, 1);
 	}
 }
+
+void CWinProfDoc::ReadCallLog(CString filename)
+{
+	call_info.clear();
+	CFile f(filename, CFile::modeRead);
+	CALL_INFO ci;
+	while (f.Read(&ci, sizeof(CALL_INFO)))
+		call_info.push_back(ci);
+}
+
 
 
 // CWinProfDoc diagnostics

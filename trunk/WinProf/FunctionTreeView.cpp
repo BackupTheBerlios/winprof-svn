@@ -57,6 +57,7 @@ void CFunctionTreeView::OnInitialUpdate()
 	// TODO: You may populate your TreeView with items by directly accessing
 	// its tree control through a call to GetTreeCtrl().
 	GetTreeCtrl().DeleteAllItems();
+	FillTheTree();
 }
 
 
@@ -101,30 +102,18 @@ void CFunctionTreeView::FillTheTree()
 {
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
-	HTREEITEM root = ctrl.InsertItem("root",TVI_ROOT), current = root;
+	HTREEITEM root = TVI_ROOT/*ctrl.InsertItem("root",TVI_ROOT)*/, current = root;
 	
 	// place holders, line counter
-	CALL_INFO call_info;
 	RUN_INFO run_info;
 	int counter = 0;
-
-	// open the intermediate log file
-	CFile f;
-	if (!f.Open(calllog_filename, CFile::modeRead | CFile::shareDenyWrite)) 
-		return;
 
 	vector<RUN_INFO> stack;
 
 	// build the infrastructure
-	while (true) 
+	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
 	{
-		// read line from the intermediate call log file
-		int bytes_read = f.Read(&call_info, sizeof(CALL_INFO));
-		if (bytes_read == 0) return;
-		if (bytes_read < sizeof(CALL_INFO) && bytes_read > 0) {
-			OutputDebugString("unexpected end of file\n");
-			return;
-		}
+		const CALL_INFO& call_info = *iter;
 
 		// begin parsing of the read data
 		if (call_info.type == CALL_INFO_START) 
@@ -137,7 +126,7 @@ void CFunctionTreeView::FillTheTree()
 			stack.push_back(run_info);
 
 			// insert into the tree a new node
-			CString name = symbol_manager.GetSymName(call_info.address);
+			CString name = GetDocument()->symbol_manager.GetSymName(call_info.address);
 			CString s; s.Format("%x", call_info.address);
 			if (!name.IsEmpty()) s = name + " (" + s + ")";
 			current = ctrl.InsertItem(s, current);
@@ -166,7 +155,7 @@ void CFunctionTreeView::FillTheTree()
 			function_call_map[addr].time += func.diff;
 
 			// prepare information to be transferred to the table
-			CString name = symbol_manager.GetSymName(func.address);
+			CString name = GetDocument()->symbol_manager.GetSymName(func.address);
 			CString ad; ad.Format("%x", func.address);
 			if (!name.IsEmpty()) ad = name + " (" + ad + ")";
 			CString s1(dword64tostr(func.start));
@@ -216,7 +205,7 @@ void CFunctionTreeView::OnCommandsStart()
 		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
 	}
 
-	symbol_manager.SetProcess(hProcess);
+	GetDocument()->symbol_manager.SetProcess(hProcess);
 
 	FillTheTree();
 }

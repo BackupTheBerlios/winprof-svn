@@ -7,8 +7,20 @@
 using namespace std;
 using namespace stdext;
 
+void SYMBOL_INFORMATION::Serialize(CArchive& ar)
+{
+	if (ar.IsStoring())
+	{
+		ar << name << module;
+	}
+	else
+	{
+		ar >> name >> module;
+	}
+}
+
 CSymbolManager::CSymbolManager(HANDLE hProcess_)
-	: hProcess(hProcess_), hModules(NULL), nModCount(0)
+	: hProcess(hProcess_), hModules(NULL), szModPath(NULL), nModCount(0)
 {
 	SetProcess(hProcess_);
 }
@@ -26,14 +38,27 @@ void CSymbolManager::SetProcess(HANDLE hProcess)
 	EnumSymbols();
 }
 
-CSymbolManager::~CSymbolManager(void)
+void CSymbolManager::Flush()
 {
 	delete [] hModules;
-	SymCleanup(hProcess);
+	delete [] szModPath;
+	hModules = NULL;
+	szModPath = NULL;
+	if (hProcess)
+	{
+		hProcess = NULL;
+		SymCleanup(hProcess);
+	}
+}
+
+CSymbolManager::~CSymbolManager(void)
+{
+	Flush();
 }
 
 void CSymbolManager::EnumModules()
 {
+	if (hProcess == NULL) return;
 	HMODULE hmod;
 	DWORD cbNeeded;
 	if (!EnumProcessModules(hProcess, &hmod, sizeof(hmod), &cbNeeded))
@@ -43,6 +68,7 @@ void CSymbolManager::EnumModules()
 	}
 	nModCount = cbNeeded / sizeof(HMODULE);
 	hModules = new HMODULE [nModCount];
+	szModPath = new CString [nModCount];
 	if (!EnumProcessModules(hProcess, hModules, cbNeeded, &cbNeeded))
 	{
 		MessageBox(NULL, _T("Can't enumerate process modules"), NULL, MB_ICONERROR);
@@ -52,6 +78,7 @@ void CSymbolManager::EnumModules()
 
 CString CSymbolManager::GetModulesPaths()
 {
+	if (hProcess == NULL) return CString();
 	CString path;
 	set<CString> paths;
 	for (int i = 0; i < nModCount; i++)
@@ -59,6 +86,7 @@ CString CSymbolManager::GetModulesPaths()
 		char szModName[MAX_PATH];
 		if (GetModuleFileNameEx(hProcess, hModules[i], szModName, sizeof(szModName)))
 		{
+			szModPath[i] = szModName;
 			char *pLastSlash = strrchr(szModName, '\\');
 			if (pLastSlash)
 				*pLastSlash = '\0';
@@ -73,7 +101,7 @@ CString CSymbolManager::GetModulesPaths()
 CString CSymbolManager::GetSymName(DWORD dwAddress)
 {
 	symbol_map_t::const_iterator iter = symbols.find(dwAddress);
-	if (iter == symbols.end()) return "";
+	if (iter == symbols.end()) return CString();
 	return iter->second.name;
 }
 
@@ -83,16 +111,51 @@ BOOL CALLBACK SymbolsCallback(PSYMBOL_INFO pSymInfo, ULONG SymbolSize, PVOID Use
 	CSymbolManager *symman = reinterpret_cast<CSymbolManager *>(p->first);
 	SYMBOL_INFORMATION syminfo;
 	syminfo.name = pSymInfo->Name;
-	syminfo.module = symman->hModules[p->second];
+	syminfo.module = p->second;
 	symman->symbols[(DWORD)pSymInfo->Address] = syminfo;
 	return TRUE;
 }
 
 void CSymbolManager::EnumSymbols()
 {
+	if (hProcess == NULL) return;
 	for (int i=0; i<nModCount; i++)
 	{
 		pair<void *, int> p(this, i);
 		SymEnumSymbols(hProcess, (ULONG64)hModules[i], NULL, SymbolsCallback, &p);
+	}
+}
+
+void CSymbolManager::Serialize(CArchive& ar)
+{
+	if (ar.IsStoring())
+	{
+		ar << nModCount;
+		for (int i=0; i<nModCount; i++)
+			ar << szModPath[i];
+		ar << (unsigned int)symbols.size();
+		for (symbol_map_t::iterator iter = symbols.begin(); iter != symbols.end(); ++iter)
+		{
+			ar << iter->first;
+			iter->second.Serialize(ar);
+		}
+	}
+	else
+	{
+		ar >> nModCount;
+		if (szModPath) delete [] szModPath;
+		szModPath = new CString [nModCount];
+		for (int i=0; i<nModCount; i++)
+			ar >> szModPath[i];
+		unsigned int size;
+		ar >> size;
+		while (size--)
+		{
+			DWORD address;
+			SYMBOL_INFORMATION si;
+			ar >> address;
+			si.Serialize(ar);
+			symbols[address] = si;
+		}
 	}
 }

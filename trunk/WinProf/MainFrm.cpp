@@ -261,16 +261,19 @@ void CMainFrame::OnProjectOpenExe()
 		return;
 	}
 
-	TCHAR temp[MAX_PATH];
-	GetTempPath(MAX_PATH, temp);
-	CString calllog_filename;
-	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
-	GetLeftPane()->SetCallLogFileName(calllog_filename);
-
 	CWaitTerminationDialog dlg(info.hProcess);
 	dlg.DoModal();
 	CloseHandle(info.hThread);
 	CloseHandle(info.hProcess);
+
+	TCHAR temp[MAX_PATH];
+	GetTempPath(MAX_PATH, temp);
+	CString calllog_filename;
+	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
+	GetLeftPane()->GetDocument()->ReadCallLog(calllog_filename);
+
 	GetLeftPane()->OnCommandsStart();
 	GetLeftPane()->GetDocument()->SetModifiedFlag();
+	
+	GetMenu()->GetSubMenu(3)->EnableMenuItem(ID_PROJECT_OPENEXE, MF_DISABLED | MF_GRAYED | MF_BYCOMMAND);
 }

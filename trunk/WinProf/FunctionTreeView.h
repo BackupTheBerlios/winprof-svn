@@ -51,7 +51,6 @@ public:
 private:
 	typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
 	function_call_map_t function_call_map;
-	CSymbolManager symbol_manager;
 	CString calllog_filename;
 
 // Generated message map functions
@@ -59,6 +58,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnCommandsStart();
+protected:
 };
 
 #ifndef _DEBUG  // debug version in FunctionTreeView.cpp

@@ -1,8 +1,11 @@
 // WinProf++Doc.h : interface of the CWinProfDoc class
 //
 
-
 #pragma once
+
+#include "SymbolManager.h"
+#include "..\CallMon\CallMon.h"
+#include <list>
 
 class CWinProfDoc : public CDocument
 {
@@ -12,9 +15,13 @@ protected: // create from serialization only
 
 // Attributes
 public:
+	CSymbolManager symbol_manager;
+	CString m_ExeFileName;
+	std::list<CALL_INFO> call_info;
 
 // Operations
 public:
+	void ReadCallLog(CString filename);
 
 // Overrides
 	public:
@@ -35,7 +42,6 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 public:
-	CString m_ExeFileName;
 };
 
 

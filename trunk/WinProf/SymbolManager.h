@@ -7,7 +7,8 @@
 struct SYMBOL_INFORMATION
 {
 	CString name;
-	HMODULE module;
+	int module;
+	void Serialize(CArchive& ar);
 };
 
 class CSymbolManager
@@ -16,11 +17,14 @@ class CSymbolManager
 public:
 	CSymbolManager(HANDLE hProcess=0);
 	void SetProcess(HANDLE hProcess);
+	void Flush();
 	~CSymbolManager(void);
 	CString GetSymName(DWORD dwAddress);
+	void Serialize(CArchive& ar);
 private:
 	HANDLE hProcess;
 	HMODULE *hModules;
+	CString *szModPath;
 	int nModCount;
 	CString GetModulesPaths();
 	void EnumModules();

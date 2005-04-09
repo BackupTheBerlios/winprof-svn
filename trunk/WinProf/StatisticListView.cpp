@@ -228,6 +228,6 @@ void CStatisticListView::OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	delete (void *)pNMLV->lParam;
+	delete (LIST_ITEM_DATA*)pNMLV->lParam;
 	*pResult = 0;
 }

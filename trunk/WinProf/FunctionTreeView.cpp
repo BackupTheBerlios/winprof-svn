@@ -258,6 +258,6 @@ void CFunctionTreeView::OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CTreeCtrl& ctrl = GetTreeCtrl();
 	HTREEITEM hItem = pNMTreeView->itemOld.hItem;
 	if (hItem != ctrl.GetRootItem())
-		delete (void *)pNMTreeView->itemOld.lParam;
+		delete (STATISTIC_LIST_INFO*)pNMTreeView->itemOld.lParam;
 	*pResult = 0;
 }

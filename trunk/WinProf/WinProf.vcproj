@@ -170,6 +170,12 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
+				RelativePath=".\AvgTimeStat.h">
+			</File>
+			<File
+				RelativePath=".\CountCallsStat.h">
+			</File>
+			<File
 				RelativePath=".\FunctionTreeView.h">
 			</File>
 			<File
@@ -191,6 +197,9 @@
 				RelativePath=".\SymbolManager.h">
 			</File>
 			<File
+				RelativePath=".\TotalTimeStat.h">
+			</File>
+			<File
 				RelativePath=".\WaitTerminationDialog.h">
 			</File>
 			<File
@@ -198,6 +207,9 @@
 			</File>
 			<File
 				RelativePath=".\WinProfDoc.h">
+			</File>
+			<File
+				RelativePath=".\WinProfStatistics.h">
 			</File>
 		</Filter>
 		<Filter

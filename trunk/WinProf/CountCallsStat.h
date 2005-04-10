@@ -1,45 +1,42 @@
-#ifndef COUNT_CALLS_STAT
-#define COUNT_CALLS_STAT
+#pragma once
 
 #include "WinProfStatistics.h"
 #include <hash_map>
 
-namespace WIN_PROF_STATISTICS {
-
-class CountCallsStat : public WinProfStatistics<INT> {
+class CCountCallsStat : public CWinProfStatistics
+{
 public:
-	CountCallsStat(void) {}
-	virtual ~CountCallsStat(void) {}
+	CCountCallsStat(func2vect_t& func2vect_) : func2vect(func2vect_) {}
+	virtual ~CCountCallsStat(void) {}
 
-	virtual T GetStatValue(const RUN_INFO& ri) 
+	virtual CString GetString(const INVOC_INFO& call) const
 	{
-		iter_t iter = count_calls_map.find(ri.address);
-		if (iter == count_calls_map.end()) {
-			return 0;
-		}
-		return count_calls_map[ri.address];
+		char buf[100];
+		return CString(itoa(GetStatValue(call), buf, 10));
 	}
-
-	virtual BOOL UpdateWith(const RUN_INFO& ri)
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 	{
-		iter_t iter = count_calls_map.find(ri.address);
-		if (iter == count_calls_map.end()) {
-			count_calls_map[ri.address] = 0;
-		}
-		count_calls_map[ri.address]++; // the reference is incremented
-		return true;
+		return ::StatCompare(GetStatValue(c1), GetStatValue(c2));
 	}
-	virtual comp_func GetCompareFunc(void)
+	virtual CString GetStatName(void) const
 	{
-		return StatCompare<INT>;
+		return "CountCalls";
 	}
 
 private:
 	typedef stdext::hash_map<DWORD/*address*/, INT/*calls*/> count_calls_map_t;
 	typedef count_calls_map_t::const_iterator iter_t;
-	count_calls_map_t count_calls_map;
-}; // class CountCallsStat
+	//static count_calls_map_t count_calls_map;
 
-}; // namespace
+	func2vect_t& func2vect;
+protected:
+	INT GetStatValue(const INVOC_INFO& call) const
+	{
+		func2vect_t::const_iterator it = func2vect.find(call.address);
+		if(it == func2vect.end()) {
+			return -1;
+		}
+		return (INT)func2vect[call.address]->size(); // number of invocations
+	}
 
-#endif // COUNT_CALLS_STAT
+}; // class CCountCallsStat

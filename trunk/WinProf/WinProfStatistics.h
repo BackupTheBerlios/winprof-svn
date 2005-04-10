@@ -1,35 +1,45 @@
-#ifndef WIN_PROF_STATISTICS
-#define WIN_PROF_STATISTICS
+#pragma once
 
-namespace WIN_PROF_STATISTICS {
+#pragma warning( disable : 4996 )
 
-template <typename T> class WinProfStatistics {
+#include "FunctionTreeView.h"
+#include <vector>
+#include <hash_map>
+
+using namespace std;
+
+class FUNC_CALL_STAT {
 public:
-	WinProfStatistics(void) {
-		// requirements
-		T val;
-		T val1;
-		val = val1;
-		if (val == val1) { ; }
-		if (val < val1) { ; }
-	}
-	virtual ~WinProfStatistics(void);
+	FUNC_CALL_STAT(DWORD64 time) : runtime(time) {}
+	DWORD64 runtime;
+}; // class FUNC_CALL_STAT
 
-	virtual T GetStatValue(const RUN_INFO& ri);
-	virtual BOOL UpdateWith(const RUN_INFO& ri);
+class INVOC_INFO {
+public:
+	DWORD address;
+	INT invocation;
+	DWORD64 runtime;
+}; // class INVOC_INFO
 
-	typedef INT (*comp_func_t)(const T&, const T&);
+class CWinProfStatistics;
 
-	// we could implement this as a public field ???
-	virtual comp_func GetCompareFunc(void);
-}; // class WinProfStatistics
+typedef vector<FUNC_CALL_STAT*> calls_vector_t;
+typedef hash_map<DWORD/*func address*/, calls_vector_t*> func2vect_t;
+typedef hash_map<CString, CWinProfStatistics*> statistics_t;
 
-// a template "default" function
-INT StatCompare(const T &t1, const T &d2) {
+class CWinProfStatistics 
+{
+public:
+	CWinProfStatistics(void) {}
+	virtual ~CWinProfStatistics(void) {}
+
+	virtual CString GetString(const INVOC_INFO& call) const = 0;
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const = 0;
+	virtual CString GetStatName(void) const = 0;
+}; // class CWinProfStatistics
+
+template <typename T> 
+int StatCompare(const T &t1, const T &t2) {
 	if (t1 == t2) return 0;
 	return (t1 < t2) ? -1 : 1;
 }
-
-}; // namespace
-
-#endif // WIN_PROF_STATISTICS

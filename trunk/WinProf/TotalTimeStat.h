@@ -1,45 +1,51 @@
-#ifndef TOTAL_TIME_STAT
-#define TOTAL_TIME_STAT
+#pragma once
 
 #include "WinProfStatistics.h"
-#include <hash_map>
+//#include <hash_map>
 
-namespace WIN_PROF_STATISTICS {
-
-class TotalTimeStat : public WinProfStatistics<DWORD64> {
+class CTotalTimeStat : public CWinProfStatistics 
+{
 public:
-	TotalTimeStat(void) {}
-	virtual ~TotalTimeStat(void) {}
+	CTotalTimeStat(func2vect_t& func2vect_) : func2vect(func2vect_) {}
+	virtual ~CTotalTimeStat(void) {}
 
-	virtual T GetStatValue(const RUN_INFO& ri) 
+	virtual CString GetString(const INVOC_INFO& call) const
 	{
-		iter_t iter = total_time_map.find(ri.address);
-		if (iter == total_time_map.end()) {
-			return 0;
-		}
-		return total_time_map[ri.address];
+		return CFunctionTreeView::dword64tostr(GetStatValue(call));
 	}
 
-	virtual BOOL UpdateWith(const RUN_INFO& ri)
-	{
-		iter_t iter = total_time_map.find(ri.address);
-		if (iter == total_time_map.end()) {
-			total_time_map[ri.address] = (DWORD64)0;
-		}
-		total_time_map[ri.address] += ri.diff;
-		return true;
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {
+		return ::StatCompare(GetStatValue(c1), GetStatValue(c2));
 	}
-	virtual comp_func GetCompareFunc(void)
+
+	virtual CString GetStatName(void) const 
 	{
-		return StatCompare<DWORD64>;
+		return "TotalTime";
 	}
 
 private:
 	typedef stdext::hash_map<DWORD/*address*/, DWORD64/*time*/> total_time_map_t;
 	typedef total_time_map_t::const_iterator iter_t;
-	total_time_map_t total_time_map;
-}; // class TotalTimeStat
+	//static total_time_map_t total_time_map;
 
-}; // namespace
+	func2vect_t& func2vect;
 
-#endif // TOTAL_TIME_STAT
+protected:
+	DWORD64 GetStatValue(const INVOC_INFO& call) const
+	{
+		func2vect_t::const_iterator vect_it = func2vect.find(call.address);
+		if(vect_it == func2vect.end()) {
+			return -1;
+		}
+		
+		const calls_vector_t* call_vect = func2vect[call.address];
+		ASSERT(call_vect != NULL);
+		DWORD64 total_time = 0;
+		calls_vector_t::const_iterator call_it = call_vect->begin();
+		for(;call_it != call_vect->end(); ++call_it) {
+			FUNC_CALL_STAT* call_ptr = *call_it;
+			total_time += call_ptr->runtime;
+		}
+		return total_time;
+	}
+}; // class CTotalTimeStat

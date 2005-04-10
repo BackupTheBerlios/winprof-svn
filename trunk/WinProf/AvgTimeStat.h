@@ -1,34 +1,29 @@
-#ifndef AVG_TIME_STAT
-#define AVG_TIME_STAT
+#pragma once
 
 #include "TotalTimeStat.h"
 #include "CountCallsStat.h"
 
-namespace WIN_PROF_STATISTICS {
-
-class AvgTimeStat : public WinProfStatistics<DWORD64> {
+class CAvgTimeStat : public CTotalTimeStat, public CCountCallsStat
+{
 public:
-	AvgTimeStat(const TotalTimeStat& ref_total_time_, const CountCallsStat& ref_count_calls_) :
-	  ref_total_time(ref_total_time_), ref_count_calls(ref_count_calls_) {}
-	virtual ~AvgTimeStat(void) {}
+	CAvgTimeStat(func2vect_t& func2vect_) 
+		: CTotalTimeStat(func2vect_), CCountCallsStat(func2vect_) {}
+	virtual ~CAvgTimeStat(void) {}
 
-	virtual DWORD64 GetStatValue(const RUN_INFO& ri) {
-		DWORD64 calls = (DWORD64)ref_count_calls.GetStatValue();
+	virtual CString GetString(const INVOC_INFO& call) const {
+		return CFunctionTreeView::dword64tostr(GetStatValue(call));
+	}
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
+	{
+		return ::StatCompare(GetStatValue(c1), GetStatValue(c2));
+	}
+	virtual CString GetStatName(void) const {
+		return "AvgTime";
+	}
+protected:
+	DWORD64 GetStatValue(const INVOC_INFO& call) const {
+		DWORD64 calls = (DWORD64)CCountCallsStat::GetStatValue(call);
 		if (calls == 0) return 0;
-		return ref_total_time.GetStatValue()/calls;
+		return CTotalTimeStat::GetStatValue(call)/calls;
 	}
-	virtual BOOL UpdateWith(const RUN_INFO& ri) {
-		return true;
-	}
-	virtual comp_func GetCompareFunc(void) {
-		return StatCompare<DWORD64>;
-	}
-
-private:
-	TotalTimeStat& ref_total_time;
-	CountCallsStat& ref_count_calls;
-}; // class AvgTimeStat 
-
-}; // namespace
-
-#endif // COUNT_CALLS_STAT
+}; // class CAvgTimeStat 

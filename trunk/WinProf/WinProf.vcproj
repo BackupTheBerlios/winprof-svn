@@ -164,17 +164,18 @@
 			<File
 				RelativePath=".\WinProfDoc.cpp">
 			</File>
+			<Filter
+				Name="Statistics"
+				Filter="">
+				<File
+					RelativePath=".\StatManager.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
-			<File
-				RelativePath=".\AvgTimeStat.h">
-			</File>
-			<File
-				RelativePath=".\CountCallsStat.h">
-			</File>
 			<File
 				RelativePath=".\FunctionTreeView.h">
 			</File>
@@ -197,9 +198,6 @@
 				RelativePath=".\SymbolManager.h">
 			</File>
 			<File
-				RelativePath=".\TotalTimeStat.h">
-			</File>
-			<File
 				RelativePath=".\WaitTerminationDialog.h">
 			</File>
 			<File
@@ -208,9 +206,25 @@
 			<File
 				RelativePath=".\WinProfDoc.h">
 			</File>
-			<File
-				RelativePath=".\WinProfStatistics.h">
-			</File>
+			<Filter
+				Name="Statistics"
+				Filter="">
+				<File
+					RelativePath=".\AvgTimeStat.h">
+				</File>
+				<File
+					RelativePath=".\CountCallsStat.h">
+				</File>
+				<File
+					RelativePath=".\StatManager.h">
+				</File>
+				<File
+					RelativePath=".\TotalTimeStat.h">
+				</File>
+				<File
+					RelativePath=".\WinProfStatistics.h">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Resource Files"

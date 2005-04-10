@@ -5,6 +5,8 @@
 #pragma once
 
 #include <hash_map>
+//#include "CWinProfStatistics.h"
+//#include "StatManager.h"
 
 struct FUNCTION_CALL_INFO {
 	unsigned int count;

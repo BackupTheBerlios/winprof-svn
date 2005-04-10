@@ -41,6 +41,7 @@ public:
 protected:
 	virtual void OnInitialUpdate(); // called first time after construct
 	virtual void FillTheTree();
+public:
 	static CString dword64tostr(DWORD64 x);
 	
 // Implementation

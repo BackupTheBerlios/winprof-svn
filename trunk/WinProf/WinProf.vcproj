@@ -213,6 +213,9 @@
 					RelativePath=".\AvgTimeStat.h">
 				</File>
 				<File
+					RelativePath=".\CommonDefs.h">
+				</File>
+				<File
 					RelativePath=".\CountCallsStat.h">
 				</File>
 				<File

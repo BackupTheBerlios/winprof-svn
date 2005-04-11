@@ -4,6 +4,7 @@
 #pragma once
 
 #include "SymbolManager.h"
+#include "StatManager.h"
 #include "..\CallMon\CallMon.h"
 #include <list>
 
@@ -16,6 +17,7 @@ protected: // create from serialization only
 // Attributes
 public:
 	CSymbolManager symbol_manager;
+	CStatManager stat_manager;
 	CString m_ExeFileName;
 	std::list<CALL_INFO> call_info;
 	DWORD64 m_Frequency;

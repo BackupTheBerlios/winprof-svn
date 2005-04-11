@@ -1,34 +1,27 @@
 #pragma once
 
 #include "WinProfStatistics.h"
-//#include <hash_map>
+#include "FunctionTreeView.h"
 
 class CTotalTimeStat : public CWinProfStatistics 
 {
 public:
-	CTotalTimeStat(func2vect_t& func2vect_) : func2vect(func2vect_) {}
+	CTotalTimeStat(void) {}
 	virtual ~CTotalTimeStat(void) {}
 
 	virtual CString GetString(const INVOC_INFO& call) const
-	{
-		return CFunctionTreeView::dword64tostr(GetStatValue(call));
-	}
+		{return CFunctionTreeView::dword64tostr(GetStatValue(call));}
 
-	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {
-		return ::StatCompare(GetStatValue(c1), GetStatValue(c2));
-	}
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const 
+		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1), GetStatValue(c2));}
 
 	virtual CString GetStatName(void) const 
-	{
-		return "TotalTime";
-	}
+		{return "TotalTime";}
 
 private:
 	typedef stdext::hash_map<DWORD/*address*/, DWORD64/*time*/> total_time_map_t;
 	typedef total_time_map_t::const_iterator iter_t;
 	//static total_time_map_t total_time_map;
-
-	func2vect_t& func2vect;
 
 protected:
 	DWORD64 GetStatValue(const INVOC_INFO& call) const

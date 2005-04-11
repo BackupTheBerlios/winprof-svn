@@ -12,6 +12,7 @@
 #include "SymbolManager.h"
 #include ".\functiontreeview.h"
 #include <vector>
+#include "StatManager.h"
 
 using namespace std;
 using namespace stdext;
@@ -100,20 +101,10 @@ void CFunctionTreeView::FillTheTree()
 {
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
-
 	ctrl.DeleteAllItems();
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
-	
-	// place holders, line counter
-	RUN_INFO run_info;
-	int counter = 0;
-
-	vector<RUN_INFO> stack;
-
-	DWORD64 freq = GetDocument()->m_Frequency;
-	function_call_map_t& function_call_map = static_cast<CMainFrame*>(AfxGetMainWnd())->function_call_map;
-
-	function_call_map.clear();
+	vector<INVOC_INFO*> stack;
+	INVOC_INFO* invoc_info;
 
 	// build the infrastructure
 	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
@@ -123,46 +114,33 @@ void CFunctionTreeView::FillTheTree()
 		// begin parsing of the read data
 		if (call_info.type == CALL_INFO_START) 
 		{
-			// update run_info
-			run_info.address = call_info.address;
-			run_info.start = call_info.time;
-			run_info.finish = 0; // stub values, to be updated on the 
-			run_info.diff = 0;
-			stack.push_back(run_info);
-
 			// insert into the tree a new node
 			CString name = GetDocument()->symbol_manager.GetSymName(call_info.address);
-			if (name.IsEmpty())
-				name.Format("%x", call_info.address);
+			if (name.IsEmpty()) name.Format("%x", call_info.address);
 			current = ctrl.InsertItem(name, current);
+
+			// attach the data to the tree node
+			invoc_info = new INVOC_INFO(call_info.address, 0/*invoc_number*/, 0/*run_time*/);
+			ctrl.SetItemData(current, (DWORD_PTR)invoc_info);
+
+			// update the stat manager and the invoc_info
+			// the stat man must be updated on info_start to ensure the right order of calls
+			GetDocument()->stat_manager.UpdateStatsWith(*invoc_info); // invoc_number is updated here
+			invoc_info->runtime = call_info.time; // will be updated
+			
+			// the runtime will be updated, when the end of call is detected
+			stack.push_back(invoc_info);
 		} else {
 			// if the call log file is built properly this if is never entered
-			ASSERT(stack.back().address == call_info.address);
+			invoc_info = stack.back();
+			ASSERT(invoc_info->address == call_info.address);
 
-			// update the stack values
-			RUN_INFO& func = stack.back();
-			func.finish = call_info.time;
-			func.diff = func.finish - func.start;
+			// back references
+			invoc_info->runtime = call_info.time - invoc_info->runtime;
+			GetDocument()->stat_manager.UpdateRunTime(*invoc_info);
 
-			// collect statistics information about functions call
-			DWORD addr = call_info.address;
-			function_call_map_t::const_iterator iter = function_call_map.find(addr);
-			if (iter == function_call_map.end()) {
-				function_call_map[addr] = FUNCTION_CALL_INFO();
-			}
-			function_call_map[addr].count++;
-			function_call_map[addr].time += func.diff;
-
-			// prepare information to be transferred to the table
-			CString name = GetDocument()->symbol_manager.GetSymName(func.address);
-			if (name.IsEmpty())
-				name.Format("%x", func.address);
-			CString time = dword64tostr(func.diff * 1000 / freq);
-
-			ctrl.SetItemData(current, (DWORD_PTR)new STATISTIC_LIST_INFO(func.address, name, time));
-
+			// update controls
 			stack.pop_back();
-
 			current = ctrl.GetParentItem(current);
 		}
 	}

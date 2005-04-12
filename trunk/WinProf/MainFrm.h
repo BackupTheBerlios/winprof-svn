@@ -1,19 +1,15 @@
 // MainFrm.h : interface of the CMainFrame class
 //
 
-
 #pragma once
 
-#include <hash_map>
-//#include "CWinProfStatistics.h"
-//#include "StatManager.h"
+#include "stdafx.h"
+#include "resource.h"       // main symbols
 
 struct FUNCTION_CALL_INFO {
 	unsigned int count;
 	DWORD64 time;
 };
-
-typedef stdext::hash_map<DWORD, FUNCTION_CALL_INFO> function_call_map_t;
 
 class CStatisticListView;
 class CFunctionTreeView;
@@ -27,8 +23,6 @@ protected: // create from serialization only
 // Attributes
 protected:
 	CSplitterWnd m_wndSplitter;
-public:
-	function_call_map_t function_call_map;
 
 // Operations
 public:

@@ -170,6 +170,9 @@
 				<File
 					RelativePath=".\StatManager.cpp">
 				</File>
+				<File
+					RelativePath=".\WinProfStatistics.cpp">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter

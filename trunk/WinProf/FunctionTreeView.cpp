@@ -12,7 +12,6 @@
 #include "SymbolManager.h"
 #include ".\functiontreeview.h"
 #include <vector>
-#include "StatManager.h"
 
 using namespace std;
 using namespace stdext;
@@ -59,7 +58,6 @@ void CFunctionTreeView::OnInitialUpdate()
 
 	// TODO: You may populate your TreeView with items by directly accessing
 	// its tree control through a call to GetTreeCtrl().
-	FillTheTree();
 }
 
 
@@ -107,7 +105,8 @@ void CFunctionTreeView::FillTheTree()
 	INVOC_INFO* invoc_info;
 
 	// build the infrastructure
-	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
+	list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin();
+	for (; iter != GetDocument()->call_info.end(); ++iter)
 	{
 		const CALL_INFO& call_info = *iter;
 
@@ -204,12 +203,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 
 		if (hItem != ctrl.GetRootItem())
-		{
-			STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hItem);
-			OutputDebugString(recieve->name);
-			CString str[]  = {recieve->name, recieve->time};
-			RightPane->InsertLine(++counter, str, recieve->address);
-		}
+			RightPane->InsertLine(++counter, (INVOC_INFO*)ctrl.GetItemData(hItem));
 
 		if (ctrl.ItemHasChildren(hItem))
 		{
@@ -218,10 +212,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 			HTREEITEM hChildItem = ctrl.GetChildItem(hItem);
 			while (hChildItem != NULL)
 			{
-				STATISTIC_LIST_INFO *recieve = (STATISTIC_LIST_INFO *)ctrl.GetItemData(hChildItem);
-				OutputDebugString(recieve->name);
-				CString str[]  = {recieve->name,recieve->time};
-				RightPane->InsertLine(++counter, str, recieve->address);
+				RightPane->InsertLine(++counter, (INVOC_INFO*)ctrl.GetItemData(hChildItem));
 			    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
 			}
 		}
@@ -236,6 +227,6 @@ void CFunctionTreeView::OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CTreeCtrl& ctrl = GetTreeCtrl();
 	HTREEITEM hItem = pNMTreeView->itemOld.hItem;
 	if (hItem != ctrl.GetRootItem())
-		delete (STATISTIC_LIST_INFO*)pNMTreeView->itemOld.lParam;
+		delete (INVOC_INFO*)pNMTreeView->itemOld.lParam;
 	*pResult = 0;
 }

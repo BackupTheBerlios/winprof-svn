@@ -3,6 +3,7 @@
 
 
 #pragma once
+#include "CommonDefs.h"
 
 class CStatisticListView : public CListView
 {
@@ -31,7 +32,8 @@ public:
 #endif
 
 public:
-	void InsertLine(int lineNumber, CString *str, DWORD address);
+	void InsertLine(int lineNumber, INVOC_INFO* invoc_info);
+
 // Generated message map functions
 protected:
 	afx_msg void OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStruct);

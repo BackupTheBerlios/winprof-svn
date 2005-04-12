@@ -11,6 +11,9 @@ public:
 	virtual CString GetString(const INVOC_INFO& call) const = 0;
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const = 0;
 	virtual CString GetStatName(void) const = 0;
+	virtual stats_type GetStatID(void) const = 0;
+	virtual int GetWidth(void) const {return 100;}
+	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
 	
 protected:
 	// a commonly used compare scenario
@@ -22,5 +25,3 @@ protected:
 
 	static func2vect_t& func2vect;
 }; // class CWinProfStatistics
-
-func2vect_t& CWinProfStatistics::func2vect(CStatManager::GetDataBaseRef());

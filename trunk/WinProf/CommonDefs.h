@@ -12,20 +12,18 @@ public:
 	DWORD64 runtime;
 }; // class FUNC_CALL_STAT
 
-typedef FUNC_CALL_STAT* FUNC_CALL_STAT_PTR;
-
 class INVOC_INFO {
 public:
 	INVOC_INFO(DWORD a, INT i, DWORD64 r) 
 		: address(a), invocation(i), runtime(r) {}
-public:
 	DWORD address;
 	INT invocation;
 	DWORD64 runtime;
 }; // class INVOC_INFO
 
-class CWinProfStatistics;
+typedef enum {TOTAL_TIME=0, COUNT_CALLS, AVG_TIME} stats_type;
 
+class CWinProfStatistics;
 typedef vector<FUNC_CALL_STAT*> calls_vector_t;
 typedef hash_map<DWORD/*func address*/, calls_vector_t*> func2vect_t;
-typedef hash_map<CString, CWinProfStatistics*> statistics_t;
+typedef hash_map<stats_type, CWinProfStatistics*> statistics_t;

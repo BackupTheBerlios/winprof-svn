@@ -4,22 +4,22 @@
 #include "stdafx.h"
 #include "WinProf.h"
 #include "StatisticsDialog.h"
+#include "FunctionTreeView.h"
 #include ".\statisticsdialog.h"
-
+#include "WinProfStatistics.h"
+#include "WinProfDoc.h"
 
 // CStatisticsDialog dialog
 
 IMPLEMENT_DYNAMIC(CStatisticsDialog, CDialog)
-CStatisticsDialog::CStatisticsDialog(DWORD address, CString name, DWORD call_count, double avg_runtime,
-									 CWnd* pParent /*=NULL*/)
+
+CStatisticsDialog::CStatisticsDialog(CWinProfDoc* pDoc, DWORD address, CWnd* pParent)
 	: CDialog(CStatisticsDialog::IDD, pParent)
-	, m_Address(_T(""))
-	, m_Name(name)
-	, m_CallCount(call_count)
-	, m_AvgRunTime(_T(""))
+	, m_Address(CFunctionTreeView::dword64tostr(address))
+	, m_Name(pDoc->symbol_manager.GetSymName(address))
+	, m_CallCount(pDoc->stat_manager.GetStats()[COUNT_CALLS]->GetString(INVOC_INFO(address, 0, 0)))
+	, m_AvgRunTime(pDoc->stat_manager.GetStats()[AVG_TIME]->GetString(INVOC_INFO(address, 0, 0)))
 {
-	m_Address.Format("0x%08x", address);
-	m_AvgRunTime.Format("%1.3f ms", avg_runtime);
 }
 
 CStatisticsDialog::~CStatisticsDialog()

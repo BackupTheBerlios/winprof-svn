@@ -10,12 +10,14 @@
 #include ".\statisticlistview.h"
 #include "StatisticsDialog.h"
 #include <utility>
+#include "StatManager.h"
+#include "WinProfStatistics.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-struct LIST_ITEM_DATA
+/*struct LIST_ITEM_DATA
 {
 	int line;
 	CString name;
@@ -23,7 +25,7 @@ struct LIST_ITEM_DATA
 	CString runtime;
 	LIST_ITEM_DATA(int line_, CString name_, DWORD address_, CString runtime_)
 		: line(line_), name(name_), address(address_), runtime(runtime_) {}
-};
+};*/
 
 using namespace std;
 
@@ -98,7 +100,7 @@ void CStatisticListView::OnStyleChanged(int /*nStyleType*/, LPSTYLESTRUCT /*lpSt
 	Default();
 }
 
-void CStatisticListView::InsertLine(int lineNumber, CString str[NUM_COLUMNS-1], DWORD address)
+void CStatisticListView::InsertLine(int lineNumber, INVOC_INFO* invoc_info)
 {
 	CListCtrl& ctrl = GetListCtrl();
 	LV_ITEM lvi;
@@ -114,10 +116,17 @@ void CStatisticListView::InsertLine(int lineNumber, CString str[NUM_COLUMNS-1], 
 	lvi.iImage = lineNumber;
 	lvi.stateMask = LVIS_STATEIMAGEMASK;
 	lvi.state = INDEXTOSTATEIMAGEMASK(1);
-	ctrl.SetItemData(ctrl.InsertItem(&lvi), (DWORD_PTR)new LIST_ITEM_DATA(lineNumber, str[0], address, str[1]));
+	ctrl.SetItemData(ctrl.InsertItem(&lvi), (DWORD_PTR)invoc_info->address);
+		//(DWORD_PTR)new LIST_ITEM_DATA(lineNumber, str[0], address, str[1]));
 
-	for(int j = 1; j<NUM_COLUMNS; j++)
-		ctrl.SetItemText(lineNumber-1, j, str[j-1]);
+	// the function name is set manually
+	CWinProfDoc* doc = GetDocument();
+	ctrl.SetItemText(lineNumber-1, 1, doc->symbol_manager.GetSymName(invoc_info->address));
+
+	// the rest of information
+	statistics_t& stats = GetDocument()->stat_manager.GetStats();
+	for(int j = 2; j < (int)stats.size(); j++)
+		ctrl.SetItemText(lineNumber-1, j, stats[(stats_type)j]->GetString(*invoc_info));
 }
 
 int CStatisticListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -131,18 +140,31 @@ int CStatisticListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ListCtrl.SetExtendedStyle(ListCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
 	// building columns
-	int i;
 	LV_COLUMN lvc;
 	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-	for(i = 0; i<NUM_COLUMNS; i++)
-	{
+
+	// the first 2 columns must always be the number and the function name
+	for(int i = 0; i < 2; ++i) {
 		lvc.iSubItem = i;
 		lvc.pszText = _ColumnName[i];
 		lvc.cx = _ColumnWidth[i];
 		lvc.fmt = _ColumnPlace[i];
-		ListCtrl.InsertColumn(i,&lvc);
+		ListCtrl.InsertColumn(i, &lvc);
 	}
-	// clean the table for further use
+	
+	// build all the rest of columns
+	statistics_t& stats = GetDocument()->stat_manager.GetStats();
+	for(int i = 0; i < (int)stats.size(); i++) 
+	{
+		lvc.iSubItem = i+2;
+		stats_type st = (stats_type)i;
+		char buf[100];
+		strcpy(buf, stats[st]->GetStatName().GetString());
+		lvc.pszText = buf;
+		lvc.cx = stats[st]->GetWidth();
+		lvc.fmt = stats[st]->GetColumnPlace();
+		ListCtrl.InsertColumn(i+2, &lvc);
+	}
 
 	return 0;
 }
@@ -161,18 +183,14 @@ void CStatisticListView::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	int item = reinterpret_cast<NMITEMACTIVATE *>(pNMHDR)->iItem;
 	if (item == -1) return;
 	CListCtrl& ctrl = GetListCtrl();
-	function_call_map_t& function_call_map = static_cast<CMainFrame*>(AfxGetMainWnd())->function_call_map;
-	DWORD address = reinterpret_cast<LIST_ITEM_DATA*>(ctrl.GetItemData(item))->address;
-	function_call_map_t::const_iterator iter = function_call_map.find(address);
-	ASSERT(iter != function_call_map.end());
-	double avg = (double)iter->second.time / GetDocument()->m_Frequency * 1000 / iter->second.count;
-	CStatisticsDialog dlg(address, ctrl.GetItemText(item, 1), iter->second.count, avg);
+	DWORD address = DWORD(ctrl.GetItemData(item));
+	CStatisticsDialog dlg(GetDocument(), address);
 	dlg.DoModal();
 }
 
 int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	int column = (int)lParamSort & 0xFF;
+/*	int column = (int)lParamSort & 0xFF;
 	int direction = ((int)lParamSort >> 8) & 0xFF;
 	LIST_ITEM_DATA *l1, *l2;
 	if (direction)
@@ -196,14 +214,14 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			return l1->runtime.Compare(l2->runtime);
 		else
 			return l1->runtime.GetLength() - l2->runtime.GetLength();
-	}
-	return 0;
-}
+	} */
+	return 0;  
+} 
 
 void CStatisticListView::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	*pResult = 0;
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+/*	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
 //	pair<CListCtrl*, int> p(&GetListCtrl(), pNMLV->iSubItem);
 	for (int i=0; i<GetListCtrl().GetItemCount(); i++)
@@ -221,13 +239,13 @@ void CStatisticListView::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 		direction = 0;
 		last_column = pNMLV->iSubItem;
 	}
-	GetListCtrl().SortItems(CompareFunc, (direction<<8) + last_column);
+	GetListCtrl().SortItems(CompareFunc, (direction<<8) + last_column); */
 }
 
 void CStatisticListView::OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	delete (LIST_ITEM_DATA*)pNMLV->lParam;
+	//delete (LIST_ITEM_DATA*)pNMLV->lParam;
 	*pResult = 0;
 }

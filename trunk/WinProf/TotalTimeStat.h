@@ -18,6 +18,9 @@ public:
 	virtual CString GetStatName(void) const 
 		{return "TotalTime";}
 
+	virtual stats_type GetStatID(void) const
+		{return TOTAL_TIME;}
+
 private:
 	typedef stdext::hash_map<DWORD/*address*/, DWORD64/*time*/> total_time_map_t;
 	typedef total_time_map_t::const_iterator iter_t;
@@ -27,18 +30,16 @@ protected:
 	DWORD64 GetStatValue(const INVOC_INFO& call) const
 	{
 		func2vect_t::const_iterator vect_it = func2vect.find(call.address);
-		if(vect_it == func2vect.end()) {
-			return -1;
-		}
+		if(vect_it == func2vect.end()) return -1;
 		
-		const calls_vector_t* call_vect = func2vect[call.address];
+		const calls_vector_t* call_vect = vect_it->second;
 		ASSERT(call_vect != NULL);
 		DWORD64 total_time = 0;
-		calls_vector_t::const_iterator call_it = call_vect->begin();
-		for(;call_it != call_vect->end(); ++call_it) {
-			FUNC_CALL_STAT* call_ptr = *call_it;
-			total_time += call_ptr->runtime;
-		}
+		for(int i = 0; i < (int)call_vect->size(); i++)
+			total_time += (*call_vect)[i]->runtime;
+
+		//TRACE("inside total run time %s \n", CFunctionTreeView::dword64tostr(total_time));
+
 		return total_time;
 	}
 }; // class CTotalTimeStat

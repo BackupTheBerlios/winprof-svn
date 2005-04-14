@@ -3,6 +3,7 @@
 #include "MainFrm.h"
 #include "TotalTimeStat.h"
 #include "CountCallsStat.h"
+#include "WinProfDoc.h"
 
 class CAvgTimeStat : public CTotalTimeStat, public CCountCallsStat
 {
@@ -11,13 +12,13 @@ public:
 	virtual ~CAvgTimeStat(void) {}
 
 	virtual CString GetString(const INVOC_INFO& call) const 
-		{return CFunctionTreeView::dword64tostr(GetStatValue(call));}
+		{return CFunctionTreeView::dword64tostr(GetStatValue(call)/**1000/CWinProfDoc::m_Frequency*/);}
 
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1), GetStatValue(c2));}
 
 	virtual CString GetStatName(void) const 
-		{return "AvgTime";}
+		{return "Avg Run Time (ms)";}
 
 	virtual stats_type GetStatID(void) const 
 		{return AVG_TIME;}

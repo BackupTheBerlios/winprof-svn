@@ -12,8 +12,9 @@ public:
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const = 0;
 	virtual CString GetStatName(void) const = 0;
 	virtual stats_type GetStatID(void) const = 0;
-	virtual int GetWidth(void) const {return 100;}
+	virtual int GetWidth(void) const {return 150;}
 	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
+	virtual bool IsVisible(void) const {return false;}
 	
 protected:
 	// a commonly used compare scenario

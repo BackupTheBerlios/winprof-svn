@@ -13,13 +13,14 @@ public:
 
 	// make these functions non static to ensure that the object is created
 	// if so, then all the allocated data is deleted "automatically" in destructor
-	INT UpdateStatsWith(INVOC_INFO& call); // returns the invocation number
-										// updates the call contents
-	void UpdateRunTime(INVOC_INFO& call); // workaround
+
+	// returns the invocation number
+	INT UpdateStatsWith(const INVOC_INFO& call);
+	void UpdateRunTime(const INVOC_INFO& call, DWORD64 time); // workaround
 
 private: // auxiliary functions
-	static FUNC_CALL_STAT* GetExistingEntry(const INVOC_INFO& call);
-	static FUNC_CALL_STAT*& GetNextEntry(INVOC_INFO& call);
+	static FUNC_CALL_STAT* GetCall(const INVOC_INFO& call);
+	static FUNC_CALL_STAT*& AddCall(const INVOC_INFO& call, int& invoc);
 
 public:
 	static statistics_t& GetStats(void) {return stats;}

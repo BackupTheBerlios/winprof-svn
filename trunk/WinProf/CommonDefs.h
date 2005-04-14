@@ -6,6 +6,21 @@
 
 using namespace std;
 
+class CSymbolManager;
+class CStatManager;
+
+// defined here to be initialized
+class LIST_ITEM_DATA
+{
+public:
+	int line;
+	DWORD address;
+	LIST_ITEM_DATA(int l, DWORD a) : line(l), address(a) {}
+
+	static CSymbolManager* man;
+	static CStatManager* stats;
+}; // class LIST_ITEM_DATA
+
 class FUNC_CALL_STAT {
 public:
 	FUNC_CALL_STAT(DWORD64 time) : runtime(time) {}
@@ -14,11 +29,9 @@ public:
 
 class INVOC_INFO {
 public:
-	INVOC_INFO(DWORD a, INT i, DWORD64 r) 
-		: address(a), invocation(i), runtime(r) {}
+	INVOC_INFO(DWORD a, INT i) : address(a), invocation(i) {}
 	DWORD address;
 	INT invocation;
-	DWORD64 runtime;
 }; // class INVOC_INFO
 
 typedef enum {TOTAL_TIME=0, COUNT_CALLS, AVG_TIME} stats_type;

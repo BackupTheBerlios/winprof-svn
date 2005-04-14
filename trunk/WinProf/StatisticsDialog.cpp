@@ -17,8 +17,8 @@ CStatisticsDialog::CStatisticsDialog(CWinProfDoc* pDoc, DWORD address, CWnd* pPa
 	: CDialog(CStatisticsDialog::IDD, pParent)
 	, m_Address(CFunctionTreeView::dword64tostr(address))
 	, m_Name(pDoc->symbol_manager.GetSymName(address))
-	, m_CallCount(pDoc->stat_manager.GetStats()[COUNT_CALLS]->GetString(INVOC_INFO(address, 0, 0)))
-	, m_AvgRunTime(pDoc->stat_manager.GetStats()[AVG_TIME]->GetString(INVOC_INFO(address, 0, 0)))
+	, m_CallCount(pDoc->stat_manager.GetStats()[COUNT_CALLS]->GetString(INVOC_INFO(address, 0)))
+	, m_AvgRunTime(pDoc->stat_manager.GetStats()[AVG_TIME]->GetString(INVOC_INFO(address, 0)))
 {
 }
 

@@ -22,6 +22,7 @@ END_MESSAGE_MAP()
 
 
 // CWinProfDoc construction/destruction
+DWORD64 CWinProfDoc::m_Frequency = 0;
 
 CWinProfDoc::CWinProfDoc()
 : m_ExeFileName(_T(""))

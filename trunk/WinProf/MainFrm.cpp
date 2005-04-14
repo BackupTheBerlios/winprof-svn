@@ -274,7 +274,7 @@ void CMainFrame::OnProjectOpenExe()
 	CFile::Remove(calllog_filename);
 	LARGE_INTEGER freq;
 	QueryPerformanceFrequency(&freq);
-	GetLeftPane()->GetDocument()->m_Frequency = (DWORD64)freq.QuadPart;
+	CWinProfDoc::m_Frequency = (DWORD64)freq.QuadPart;
 
 	GetLeftPane()->OnCommandsStart();
 	GetLeftPane()->GetDocument()->SetModifiedFlag();

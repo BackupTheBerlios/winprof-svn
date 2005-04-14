@@ -31,6 +31,16 @@ BEGIN_MESSAGE_MAP(CFunctionTreeView, CTreeView)
 	ON_NOTIFY_REFLECT(TVN_DELETEITEM, OnTvnDeleteitem)
 END_MESSAGE_MAP()
 
+CSymbolManager* LIST_ITEM_DATA::man = NULL;
+CStatManager* LIST_ITEM_DATA::stats = NULL;
+
+// used in CFunctionTreeView::FillTheTree only
+class INVOC_INFO_EX {
+public:
+	INVOC_INFO_EX(DWORD a, DWORD64 t) : address(a), time(t) {}
+	DWORD address;
+	DWORD64 time;
+}; // class INVOC_INFO_EX
 
 // CFunctionTreeView construction/destruction
 
@@ -97,12 +107,18 @@ CString CFunctionTreeView::dword64tostr(DWORD64 x)
 
 void CFunctionTreeView::FillTheTree()
 {
+	// I cannot find a better place to initialize this... shouldn't be here
+	LIST_ITEM_DATA::man = &(GetDocument()->symbol_manager);
+	LIST_ITEM_DATA::stats = &(GetDocument()->stat_manager);
+
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
 	ctrl.DeleteAllItems();
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
-	vector<INVOC_INFO*> stack;
+	vector<INVOC_INFO_EX*> stack;
 	INVOC_INFO* invoc_info;
+	INVOC_INFO_EX* invoc_info_ex;
+	int invocation;
 
 	// build the infrastructure
 	list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin();
@@ -118,27 +134,30 @@ void CFunctionTreeView::FillTheTree()
 			if (name.IsEmpty()) name.Format("%x", call_info.address);
 			current = ctrl.InsertItem(name, current);
 
+			// insert an entry to the stack
+			invoc_info_ex = new INVOC_INFO_EX(call_info.address, call_info.time);
+			stack.push_back(invoc_info_ex);
+
 			// attach the data to the tree node
-			invoc_info = new INVOC_INFO(call_info.address, 0/*invoc_number*/, 0/*run_time*/);
+			invoc_info = new INVOC_INFO(call_info.address, 0/*invoc_number*/);
 			ctrl.SetItemData(current, (DWORD_PTR)invoc_info);
 
 			// update the stat manager and the invoc_info
-			// the stat man must be updated on info_start to ensure the right order of calls
-			GetDocument()->stat_manager.UpdateStatsWith(*invoc_info); // invoc_number is updated here
-			invoc_info->runtime = call_info.time; // will be updated
-			
-			// the runtime will be updated, when the end of call is detected
-			stack.push_back(invoc_info);
+			// stat man must be updated on info_start to preserve the calls order
+			invocation = GetDocument()->stat_manager.UpdateStatsWith(*invoc_info);
+			invoc_info->invocation = invocation;
 		} else {
 			// if the call log file is built properly this if is never entered
-			invoc_info = stack.back();
-			ASSERT(invoc_info->address == call_info.address);
+			invoc_info_ex = stack.back();
+			ASSERT(invoc_info_ex->address == call_info.address);
 
 			// back references
-			invoc_info->runtime = call_info.time - invoc_info->runtime;
-			GetDocument()->stat_manager.UpdateRunTime(*invoc_info);
+			DWORD64 runtime = call_info.time - invoc_info_ex->time;
+			invoc_info = (INVOC_INFO*)ctrl.GetItemData(current);
+			GetDocument()->stat_manager.UpdateRunTime(*invoc_info, runtime);
 
 			// update controls
+			delete invoc_info_ex;
 			stack.pop_back();
 			current = ctrl.GetParentItem(current);
 		}

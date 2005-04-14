@@ -35,60 +35,49 @@ CStatManager::~CStatManager(void)
 	}
 }
 
-INT CStatManager::UpdateStatsWith(INVOC_INFO& call)
+INT CStatManager::UpdateStatsWith(const INVOC_INFO& call)
 {
-	ASSERT(call.invocation == 0); // the data comes from FillTree and is not known by this time
-	ASSERT(call.runtime == 0); // the run time is also not known
-	// call.invocation is updated inside the call
-	GetNextEntry(call) = new FUNC_CALL_STAT(call.runtime);
-	return call.invocation; // the returned value is already not 0
+	// the data comes from FillTree and is not known by this time of call
+	ASSERT(call.invocation == 0); 
+	int invocation;
+	AddCall(call, invocation) = new FUNC_CALL_STAT(0/*time - to be updated later*/);
+	return invocation;
 }
 
-void CStatManager::UpdateRunTime(INVOC_INFO& call) 
+void CStatManager::UpdateRunTime(const INVOC_INFO& call, DWORD64 time) 
 {
-	//TRACE("updating the run time to value: %s \n", CFunctionTreeView::dword64tostr(call.runtime));
-	FUNC_CALL_STAT* func_call = GetExistingEntry(call);
-	if (func_call == NULL) {
-		//TRACE("the data is not found by address %lu\n", call.address);
-		return;
-	}
-	func_call->runtime = call.runtime; // updated
+	FUNC_CALL_STAT* func_call = GetCall(call);
+	if (func_call == NULL) return;
+	func_call->runtime = time;
 }
 
-FUNC_CALL_STAT* CStatManager::GetExistingEntry(const INVOC_INFO& call)
+FUNC_CALL_STAT* CStatManager::GetCall(const INVOC_INFO& call)
 {
-	//TRACE("find and existing entry, call invoc: %d \n", call.invocation);
-
 	func2vect_t::const_iterator it = func2vect.find(call.address);
-	if(it == func2vect.end()) {
-		//TRACE("%lu hash entry not found \n", call.address);
-		return NULL;
-	}
+	if(it == func2vect.end()) return NULL;
 
 	calls_vector_t* calls = it->second;
 	int pos = call.invocation - 1;
-	if (pos < 0 || pos >= (int)calls->size()) {
-		//TRACE("for %lu: pos = %d, size = %d \n", call.address, pos, (int)calls->size());
-		return NULL;
-	}
+	if (pos < 0 || pos >= (int)calls->size()) return NULL;
 
 	return (*calls)[pos];
 }
 
-FUNC_CALL_STAT*& CStatManager::GetNextEntry(INVOC_INFO& call)
+// in invoc the invocation number is returned
+FUNC_CALL_STAT*& CStatManager::AddCall(const INVOC_INFO& call, int& invoc)
 {
 	func2vect_t::const_iterator it = func2vect.find(call.address);
 
 	calls_vector_t* calls;
 	if(it == func2vect.end()) { 
-		//TRACE("created entry for address: %lu \n", call.address);
-		func2vect[call.address] = new calls_vector_t;
-		calls = func2vect[call.address];
+		calls = new calls_vector_t;
+		func2vect[call.address] = calls;
 	}
-	else
+	else {
 		calls = it->second;
+	}
 
 	calls->push_back(NULL);
-	call.invocation = (int)calls->size();
+	invoc = (int)calls->size();
 	return calls->back();
 }

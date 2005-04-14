@@ -168,6 +168,9 @@
 				Name="Statistics"
 				Filter="">
 				<File
+					RelativePath=".\Stat.cpp">
+				</File>
+				<File
 					RelativePath=".\StatManager.cpp">
 				</File>
 				<File

@@ -6,13 +6,10 @@
 #include "stdafx.h"
 #include "resource.h"       // main symbols
 
-struct FUNCTION_CALL_INFO {
-	unsigned int count;
-	DWORD64 time;
-};
-
 class CStatisticListView;
 class CFunctionTreeView;
+class CWinProfDoc;
+
 class CMainFrame : public CFrameWnd
 {
 	
@@ -21,6 +18,7 @@ protected: // create from serialization only
 	DECLARE_DYNCREATE(CMainFrame)
 
 // Attributes
+public:
 protected:
 	CSplitterWnd m_wndSplitter;
 
@@ -54,6 +52,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnProjectOpenExe();
+private:
+	void ReadSymbols(void);
+public:
+	CWinProfDoc* GetDocument(void);
 };
 
 

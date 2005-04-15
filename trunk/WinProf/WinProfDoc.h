@@ -1,4 +1,4 @@
-// WinProf++Doc.h : interface of the CWinProfDoc class
+// WinProfDoc.h : interface of the CWinProfDoc class
 //
 
 #pragma once
@@ -29,6 +29,7 @@ public:
 // Overrides
 	public:
 	virtual BOOL OnNewDocument();
+	virtual BOOL OnOpenDocument(LPCTSTR lpszPathName);
 	virtual void Serialize(CArchive& ar);
 
 // Implementation
@@ -44,7 +45,6 @@ protected:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
 };
 
 

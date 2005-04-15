@@ -168,13 +168,7 @@
 				Name="Statistics"
 				Filter="">
 				<File
-					RelativePath=".\Stat.cpp">
-				</File>
-				<File
 					RelativePath=".\StatManager.cpp">
-				</File>
-				<File
-					RelativePath=".\WinProfStatistics.cpp">
 				</File>
 			</Filter>
 		</Filter>
@@ -223,6 +217,12 @@
 				</File>
 				<File
 					RelativePath=".\CountCallsStat.h">
+				</File>
+				<File
+					RelativePath=".\FunctionStat.h">
+				</File>
+				<File
+					RelativePath=".\RunTimeStat.h">
 				</File>
 				<File
 					RelativePath=".\StatManager.h">

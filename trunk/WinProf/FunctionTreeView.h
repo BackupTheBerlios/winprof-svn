@@ -6,21 +6,7 @@
 #include <hash_map>
 #include "SymbolManager.h"
 
-struct STATISTIC_LIST_INFO
-{
-	DWORD address;
-	CString name;
-	CString time;
-	STATISTIC_LIST_INFO(DWORD address_, CString name_, CString time_)
-		: address(address_), name(name_), time(time_) {}
-};
-
 class CWinProfDoc;
-
-typedef struct {
-	DWORD address;
-	DWORD64 start, finish, diff;
-} RUN_INFO;
 
 class CFunctionTreeView : public CTreeView
 {
@@ -40,9 +26,8 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 protected:
 	virtual void OnInitialUpdate(); // called first time after construct
-	virtual void FillTheTree();
 public:
-	static CString dword64tostr(DWORD64 x);
+	void FillTheTree();
 	
 // Implementation
 public:
@@ -57,8 +42,6 @@ private:
 // Generated message map functions
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
-	afx_msg void OnCommandsStart();
 protected:
 public:
 	afx_msg void OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);

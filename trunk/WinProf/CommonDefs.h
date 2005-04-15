@@ -1,10 +1,7 @@
 #pragma once
-#pragma warning( disable : 4996 )
 
 #include <vector>
 #include <hash_map>
-
-using namespace std;
 
 class CSymbolManager;
 class CStatManager;
@@ -23,20 +20,23 @@ public:
 
 class FUNC_CALL_STAT {
 public:
-	FUNC_CALL_STAT(DWORD64 time) : runtime(time) {}
+	FUNC_CALL_STAT(DWORD64 time=0) : runtime(time) {}
 	DWORD64 runtime;
 }; // class FUNC_CALL_STAT
 
 class INVOC_INFO {
 public:
-	INVOC_INFO(DWORD a, INT i) : address(a), invocation(i) {}
+	explicit INVOC_INFO(DWORD addr, INT invoc=-1) : address(addr), invocation(invoc) {}
+	bool operator< (const INVOC_INFO &x) const
+		{return (address < x.address) || (address == x.address && invocation < x.invocation);}
+		operator size_t() const {return address ^ invocation;}
 	DWORD address;
 	INT invocation;
 }; // class INVOC_INFO
 
-typedef enum {TOTAL_TIME=0, COUNT_CALLS, AVG_TIME} stats_type;
+typedef enum {RUN_TIME, TOTAL_TIME, COUNT_CALLS, AVG_TIME} stats_type;
 
 class CWinProfStatistics;
-typedef vector<FUNC_CALL_STAT*> calls_vector_t;
-typedef hash_map<DWORD/*func address*/, calls_vector_t*> func2vect_t;
-typedef hash_map<stats_type, CWinProfStatistics*> statistics_t;
+typedef std::vector<FUNC_CALL_STAT> calls_vector_t;
+typedef stdext::hash_map<DWORD/*address*/, calls_vector_t> func2vect_t;
+typedef stdext::hash_map<stats_type, const CWinProfStatistics*> statistics_t;

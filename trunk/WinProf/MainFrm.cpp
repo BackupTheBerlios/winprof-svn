@@ -83,7 +83,7 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT /*lpcs*/,
 	if (!m_wndSplitter.CreateStatic(this, 1, 2))
 		return FALSE;
 
-	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(230, 100), pContext) ||
+	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(250, 100), pContext) ||
 		!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CStatisticListView), CSize(100, 100), pContext))
 	{
 		m_wndSplitter.DestroyWindow();
@@ -270,12 +270,63 @@ void CMainFrame::OnProjectOpenExe()
 	GetTempPath(MAX_PATH, temp);
 	CString calllog_filename;
 	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
-	GetLeftPane()->GetDocument()->ReadCallLog(calllog_filename);
+	GetDocument()->ReadCallLog(calllog_filename);
 	CFile::Remove(calllog_filename);
 	LARGE_INTEGER freq;
 	QueryPerformanceFrequency(&freq);
 	CWinProfDoc::m_Frequency = (DWORD64)freq.QuadPart;
 
-	GetLeftPane()->OnCommandsStart();
-	GetLeftPane()->GetDocument()->SetModifiedFlag();
+	ReadSymbols();
+	GetDocument()->stat_manager.Clear();
+	GetDocument()->SetModifiedFlag();
+	GetLeftPane()->FillTheTree();
+}
+
+void CMainFrame::ReadSymbols(void)
+{
+	PROCESS_INFORMATION info;
+	STARTUPINFO si;
+	memset(&si, 0, sizeof(si));
+	si.cb = sizeof(si);
+	if (!CreateProcess(GetDocument()->m_ExeFileName, NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
+	{
+		MessageBox("can't create process");
+		return;
+	}
+	BOOL stop = FALSE;
+	HANDLE hProcess = info.hProcess;
+	DEBUG_EVENT event;
+
+	while (!stop)
+	{
+		WaitForDebugEvent(&event, INFINITE);
+		switch (event.dwDebugEventCode)
+		{
+			case EXCEPTION_DEBUG_EVENT:
+				switch (event.u.Exception.ExceptionRecord.ExceptionCode)
+				{
+					case EXCEPTION_BREAKPOINT:
+						stop=TRUE;
+						break;
+				}
+		}
+		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
+	}
+
+	GetDocument()->symbol_manager.SetProcess(hProcess, GetDocument()->call_info);
+
+	TerminateProcess(hProcess, 0);
+	CloseHandle(info.hThread);
+	CloseHandle(info.hProcess);
+	while (true)
+	{
+		WaitForDebugEvent(&event, INFINITE);
+		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
+		if (event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT) break;
+	}
+}
+
+CWinProfDoc* CMainFrame::GetDocument(void)
+{
+	return GetLeftPane()->GetDocument();
 }

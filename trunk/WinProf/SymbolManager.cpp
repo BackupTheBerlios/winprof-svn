@@ -101,6 +101,7 @@ void CSymbolManager::EnumSymbols(const list<CALL_INFO>& call_info)
 	IMAGEHLP_SYMBOL *sym = reinterpret_cast<IMAGEHLP_SYMBOL*>(buf);
 	sym->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL);
 	sym->MaxNameLength = MAX_SYM_NAME;
+	symbols.clear();
 	for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
 		if (symbols.find(iter->address) == symbols.end())
 			if (SymGetSymFromAddr(hProcess, iter->address, &disp, sym))

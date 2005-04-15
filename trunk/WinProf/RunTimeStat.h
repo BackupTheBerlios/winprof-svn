@@ -5,22 +5,17 @@
 #include "WinProfDoc.h"
 #include "FunctionStat.h"
 
-class CStatHelperSum
+class CStatHelperGet
 {
 public:
 	DWORD64 operator() (const calls_vector_t& v, const INVOC_INFO& call)
-	{
-		DWORD64 sum = 0;
-		for (calls_vector_t::const_iterator i = v.begin(); i != v.end(); ++i)
-			sum += i->runtime;
-		return sum;
-	}
+		{return v[call.invocation-1].runtime;}
 };
 
-class CTotalTimeStat : public CFunctionStat<DWORD64, CStatHelperSum>
+class CRunTimeStat : public CFunctionStat<DWORD64, CStatHelperGet>
 {
 public:
-	CTotalTimeStat(void) : CFunctionStat<DWORD64, CStatHelperSum>(CStatHelperSum()) {}
+	CRunTimeStat(void) : CFunctionStat<DWORD64, CStatHelperGet>(CStatHelperGet(), false) {}
 
 	virtual CString GetString(const INVOC_INFO& call) const
 		{return DWORD64ToStr(GetStatValue(call)*1000/CWinProfDoc::m_Frequency);}
@@ -29,8 +24,11 @@ public:
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1), GetStatValue(c2));}
 
 	virtual CString GetStatName(void) const 
-		{return "Total Time (ms)";}
+		{return "Run Time (ms)";}
 
 	virtual stats_type GetStatID(void) const
-		{return TOTAL_TIME;}
+		{return RUN_TIME;}
+
+	virtual bool IsVisible(void) const
+		{return true;}
 };

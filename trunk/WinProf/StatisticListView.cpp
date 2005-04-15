@@ -50,16 +50,16 @@ BOOL CStatisticListView::PreCreateWindow(CREATESTRUCT& cs)
 	return CListView::PreCreateWindow(cs);
 }
 
-#define NUM_COLUMNS 3
+#define NUM_COLUMNS 2
 
 static _TCHAR *_ColumnName[NUM_COLUMNS] =
-{_T("#"), _T("Function Name"), _T("Run Time (ms)")};
+{_T("#"), _T("Function Name")};
 
 static int _ColumnPlace[NUM_COLUMNS] =
-{LVCFMT_LEFT, LVCFMT_LEFT, LVCFMT_LEFT};
+{LVCFMT_LEFT, LVCFMT_LEFT};
 
 static int _ColumnWidth[NUM_COLUMNS] =
-{70, 250, 100};
+{40, 250};
 
 // CStatisticListView diagnostics
 
@@ -89,7 +89,7 @@ void CStatisticListView::OnStyleChanged(int /*nStyleType*/, LPSTYLESTRUCT /*lpSt
 	Default();
 }
 
-void CStatisticListView::InsertLine(int lineNumber, INVOC_INFO* invoc_info)
+void CStatisticListView::InsertLine(int lineNumber, const INVOC_INFO& invoc_info)
 {
 	CListCtrl& ctrl = GetListCtrl();
 	LV_ITEM lvi;
@@ -105,11 +105,14 @@ void CStatisticListView::InsertLine(int lineNumber, INVOC_INFO* invoc_info)
 	lvi.iImage = lineNumber;
 	lvi.stateMask = LVIS_STATEIMAGEMASK;
 	lvi.state = INDEXTOSTATEIMAGEMASK(1);
-	ctrl.SetItemData(ctrl.InsertItem(&lvi), (DWORD_PTR)new LIST_ITEM_DATA(lineNumber, invoc_info->address));
+	ctrl.SetItemData(ctrl.InsertItem(&lvi), (DWORD_PTR)new LIST_ITEM_DATA(lineNumber, invoc_info.address));
 
 	// the function name is set manually
-	CWinProfDoc* doc = GetDocument();
-	ctrl.SetItemText(lineNumber-1, 1, doc->symbol_manager.GetSymName(invoc_info->address));
+	CString name = GetDocument()->symbol_manager.GetSymName(invoc_info.address);
+	if (name.IsEmpty()) name.Format("0x%x", invoc_info.address);
+	name.AppendFormat(" (%d)", invoc_info.invocation);
+
+	ctrl.SetItemText(lineNumber-1, 1, name);
 
 	// the rest of information
 	statistics_t& stats = GetDocument()->stat_manager.GetStats();
@@ -117,7 +120,7 @@ void CStatisticListView::InsertLine(int lineNumber, INVOC_INFO* invoc_info)
 	{
 		stats_type st = (stats_type)j;
 		if(stats[st]->IsVisible() == false) continue;
-		ctrl.SetItemText(lineNumber-1, j+2, stats[st]->GetString(*invoc_info));
+		ctrl.SetItemText(lineNumber-1, j+2, stats[st]->GetString(invoc_info));
 	}
 }
 
@@ -202,7 +205,7 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 1:		// Function Name
 		return man->GetSymName(d1->address).Compare(man->GetSymName(d2->address));
 	default:	// A statistic
-		return stats->GetStats()[stats_type(column-2)]->StatCompare(INVOC_INFO(d1->address, 0), INVOC_INFO(d2->address, 0));
+		return stats->GetStats()[stats_type(column-2)]->StatCompare(INVOC_INFO(d1->address), INVOC_INFO(d2->address));
 	}
 	return 0; 
 } 
@@ -212,7 +215,6 @@ void CStatisticListView::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-//	pair<CListCtrl*, int> p(&GetListCtrl(), pNMLV->iSubItem);
 	for (int i=0; i<GetListCtrl().GetItemCount(); i++)
 	{
 		GetListCtrl().GetItemText(i, 1);

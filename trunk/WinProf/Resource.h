@@ -7,14 +7,12 @@
 #define ID_VIEW_ARRANGE                 127
 #define IDR_MAINFRAME                   128
 #define IDR_WinProfTYPE                 129
-#define IDD_DIALOG1                     130
 #define IDD_WAIT_TERMINATION_DIALOG     130
 #define IDD_STATISTICS_DIALOG           131
 #define IDC_ADDRESS_EDIT                1001
 #define IDC_NAME_EDIT                   1002
 #define IDC_CALL_COUNT_EDIT             1003
-#define IDC_ADDRESS_EDIT4               1004
-#define IDC_AVG_RUNTIME_EDIT4           1004
+#define IDC_AVG_RUNTIME_EDIT            1004
 #define ID_PROJECT_OPENEXE              32771
 #define ID_BUTTON32774                  32774
 

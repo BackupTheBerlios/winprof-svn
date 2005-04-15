@@ -8,6 +8,7 @@
 #include ".\statisticsdialog.h"
 #include "WinProfStatistics.h"
 #include "WinProfDoc.h"
+#include "MainFrm.h"
 
 // CStatisticsDialog dialog
 
@@ -15,10 +16,10 @@ IMPLEMENT_DYNAMIC(CStatisticsDialog, CDialog)
 
 CStatisticsDialog::CStatisticsDialog(CWinProfDoc* pDoc, DWORD address, CWnd* pParent)
 	: CDialog(CStatisticsDialog::IDD, pParent)
-	, m_Address(CFunctionTreeView::dword64tostr(address))
+	, m_Address("0x" + DWORD64ToHexStr(address))
 	, m_Name(pDoc->symbol_manager.GetSymName(address))
-	, m_CallCount(pDoc->stat_manager.GetStats()[COUNT_CALLS]->GetString(INVOC_INFO(address, 0)))
-	, m_AvgRunTime(pDoc->stat_manager.GetStats()[AVG_TIME]->GetString(INVOC_INFO(address, 0)))
+	, m_CallCount(pDoc->stat_manager.GetStats()[COUNT_CALLS]->GetString(INVOC_INFO(address)))
+	, m_AvgRunTime(pDoc->stat_manager.GetStats()[AVG_TIME]->GetString(INVOC_INFO(address)))
 {
 }
 
@@ -32,7 +33,7 @@ void CStatisticsDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_ADDRESS_EDIT, m_Address);
 	DDX_Text(pDX, IDC_NAME_EDIT, m_Name);
 	DDX_Text(pDX, IDC_CALL_COUNT_EDIT, m_CallCount);
-	DDX_Text(pDX, IDC_AVG_RUNTIME_EDIT4, m_AvgRunTime);
+	DDX_Text(pDX, IDC_AVG_RUNTIME_EDIT, m_AvgRunTime);
 }
 
 

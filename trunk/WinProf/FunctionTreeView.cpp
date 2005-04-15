@@ -68,6 +68,7 @@ void CFunctionTreeView::OnInitialUpdate()
 
 	// TODO: You may populate your TreeView with items by directly accessing
 	// its tree control through a call to GetTreeCtrl().
+	FillTheTree();
 }
 
 
@@ -91,73 +92,57 @@ CWinProfDoc* CFunctionTreeView::GetDocument() // non-debug version is inline
 }
 #endif //_DEBUG
 
-CString CFunctionTreeView::dword64tostr(DWORD64 x) 
-{
-	if (x == 0) return "0";
-
-	CString s;
-	while (x)
-	{
-		s += (char)(x%10 + '0');
-		x /= 10;
-	}
-	s.MakeReverse();
-	return s;
-}
-
 void CFunctionTreeView::FillTheTree()
 {
 	// I cannot find a better place to initialize this... shouldn't be here
-	LIST_ITEM_DATA::man = &(GetDocument()->symbol_manager);
-	LIST_ITEM_DATA::stats = &(GetDocument()->stat_manager);
+	LIST_ITEM_DATA::man = &GetDocument()->symbol_manager;
+	LIST_ITEM_DATA::stats = &GetDocument()->stat_manager;
 
 	// the tree to be built and displayed, initialized to be empty
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
 	ctrl.DeleteAllItems();
+	static_cast<CMainFrame*>(AfxGetMainWnd())->GetRightPane()->GetListCtrl().DeleteAllItems();
+	if (GetDocument()->call_info.empty()) return;
+
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
-	vector<INVOC_INFO_EX*> stack;
+	vector<INVOC_INFO_EX> stack;
 	INVOC_INFO* invoc_info;
-	INVOC_INFO_EX* invoc_info_ex;
-	int invocation;
 
 	// build the infrastructure
-	list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin();
-	for (; iter != GetDocument()->call_info.end(); ++iter)
+	
+	for (list<CALL_INFO>::const_iterator iter = GetDocument()->call_info.begin(); iter != GetDocument()->call_info.end(); ++iter)
 	{
 		const CALL_INFO& call_info = *iter;
 
 		// begin parsing of the read data
 		if (call_info.type == CALL_INFO_START) 
 		{
-			// insert into the tree a new node
-			CString name = GetDocument()->symbol_manager.GetSymName(call_info.address);
-			if (name.IsEmpty()) name.Format("%x", call_info.address);
-			current = ctrl.InsertItem(name, current);
-
 			// insert an entry to the stack
-			invoc_info_ex = new INVOC_INFO_EX(call_info.address, call_info.time);
-			stack.push_back(invoc_info_ex);
+			stack.push_back(INVOC_INFO_EX(call_info.address, call_info.time));
 
-			// attach the data to the tree node
-			invoc_info = new INVOC_INFO(call_info.address, 0/*invoc_number*/);
-			ctrl.SetItemData(current, (DWORD_PTR)invoc_info);
-
+			invoc_info = new INVOC_INFO(call_info.address);
 			// update the stat manager and the invoc_info
 			// stat man must be updated on info_start to preserve the calls order
-			invocation = GetDocument()->stat_manager.UpdateStatsWith(*invoc_info);
+			int invocation = GetDocument()->stat_manager.UpdateStatsWith(*invoc_info);
 			invoc_info->invocation = invocation;
+
+			// insert into the tree a new node
+			CString name = GetDocument()->symbol_manager.GetSymName(call_info.address);
+			if (name.IsEmpty()) name.Format("0x%x", call_info.address);
+			name.AppendFormat(" (%d)", invocation);
+			current = ctrl.InsertItem(name, current);
+
+			// attach the data to the tree node
+			ctrl.SetItemData(current, (DWORD_PTR)invoc_info);
 		} else {
-			// if the call log file is built properly this if is never entered
-			invoc_info_ex = stack.back();
-			ASSERT(invoc_info_ex->address == call_info.address);
+			INVOC_INFO_EX& invoc_info_ex = stack.back();
+			ASSERT(invoc_info_ex.address == call_info.address);
 
 			// back references
-			DWORD64 runtime = call_info.time - invoc_info_ex->time;
-			invoc_info = (INVOC_INFO*)ctrl.GetItemData(current);
+			DWORD64 runtime = call_info.time - invoc_info_ex.time;
+			invoc_info = reinterpret_cast<INVOC_INFO*>(ctrl.GetItemData(current));
 			GetDocument()->stat_manager.UpdateRunTime(*invoc_info, runtime);
 
-			// update controls
-			delete invoc_info_ex;
 			stack.pop_back();
 			current = ctrl.GetParentItem(current);
 		}
@@ -169,44 +154,6 @@ void CFunctionTreeView::FillTheTree()
 }
 
 // CFunctionTreeView message handlers
-
-void CFunctionTreeView::OnCommandsStart()
-{
-	// TODO: Add your command handler code here
-
-	PROCESS_INFORMATION info;
-	STARTUPINFO si;
-	memset(&si, 0, sizeof(si));
-	si.cb = sizeof(si);
-	if (!CreateProcess(GetDocument()->m_ExeFileName, NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
-	{
-		MessageBox("can't create process");
-		return;
-	}
-	BOOL stop = FALSE;
-	HANDLE hProcess = info.hProcess;
-
-	while (!stop)
-	{
-		DEBUG_EVENT event;
-		WaitForDebugEvent(&event, INFINITE);
-		switch (event.dwDebugEventCode)
-		{
-			case EXCEPTION_DEBUG_EVENT:
-				switch (event.u.Exception.ExceptionRecord.ExceptionCode)
-				{
-					case EXCEPTION_BREAKPOINT:
-						stop=TRUE;
-						break;
-				}
-		}
-		ContinueDebugEvent(event.dwProcessId, event.dwThreadId, DBG_CONTINUE); 
-	}
-
-	GetDocument()->symbol_manager.SetProcess(hProcess, GetDocument()->call_info);
-
-	FillTheTree();
-}
 
 void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -222,7 +169,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 
 		if (hItem != ctrl.GetRootItem())
-			RightPane->InsertLine(++counter, (INVOC_INFO*)ctrl.GetItemData(hItem));
+			RightPane->InsertLine(++counter, *reinterpret_cast<INVOC_INFO*>(ctrl.GetItemData(hItem)));
 
 		if (ctrl.ItemHasChildren(hItem))
 		{
@@ -231,7 +178,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 			HTREEITEM hChildItem = ctrl.GetChildItem(hItem);
 			while (hChildItem != NULL)
 			{
-				RightPane->InsertLine(++counter, (INVOC_INFO*)ctrl.GetItemData(hChildItem));
+				RightPane->InsertLine(++counter, *reinterpret_cast<INVOC_INFO*>(ctrl.GetItemData(hChildItem)));
 			    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
 			}
 		}
@@ -246,6 +193,6 @@ void CFunctionTreeView::OnTvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CTreeCtrl& ctrl = GetTreeCtrl();
 	HTREEITEM hItem = pNMTreeView->itemOld.hItem;
 	if (hItem != ctrl.GetRootItem())
-		delete (INVOC_INFO*)pNMTreeView->itemOld.lParam;
+		delete reinterpret_cast<INVOC_INFO*>(pNMTreeView->itemOld.lParam);
 	*pResult = 0;
 }

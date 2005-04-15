@@ -12,7 +12,7 @@ public:
 	virtual ~CAvgTimeStat(void) {}
 
 	virtual CString GetString(const INVOC_INFO& call) const 
-		{return CFunctionTreeView::dword64tostr(GetStatValue(call)/**1000/CWinProfDoc::m_Frequency*/);}
+		{return DWORD64ToStr(GetStatValue(call)*1000/CWinProfDoc::m_Frequency);}
 
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1), GetStatValue(c2));}
@@ -24,9 +24,9 @@ public:
 		{return AVG_TIME;}
 
 protected:
-	DWORD64 GetStatValue(const INVOC_INFO& call) const {
+	DWORD64 GetStatValue(const INVOC_INFO& call) const
+	{
 		DWORD64 calls = (DWORD64)CCountCallsStat::GetStatValue(call);
-		//TRACE("inside avg run time %d \n", (int)calls);
 		if (calls == 0) return DWORD64(0);
 		return CTotalTimeStat::GetStatValue(call)/calls;
 	}

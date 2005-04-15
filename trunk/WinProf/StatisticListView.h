@@ -32,7 +32,7 @@ public:
 #endif
 
 public:
-	void InsertLine(int lineNumber, INVOC_INFO* invoc_info);
+	void InsertLine(int lineNumber, const INVOC_INFO& invoc_info);
 
 // Generated message map functions
 protected:

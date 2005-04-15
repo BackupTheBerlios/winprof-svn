@@ -45,10 +45,21 @@ BOOL CWinProfDoc::OnNewDocument()
 	m_ExeFileName.Empty();
 	symbol_manager.Flush();
 	call_info.clear();
+	stat_manager.Clear();
 
 	return TRUE;
 }
 
+BOOL CWinProfDoc::OnOpenDocument(LPCTSTR lpszPathName)
+{
+	if (!CDocument::OnOpenDocument(lpszPathName))
+		return FALSE;
+
+	// TODO:  Add your specialized creation code here
+	stat_manager.Clear();
+
+	return TRUE;
+}
 
 
 

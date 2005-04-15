@@ -17,10 +17,10 @@ public:
 	// returns the invocation number
 	INT UpdateStatsWith(const INVOC_INFO& call);
 	void UpdateRunTime(const INVOC_INFO& call, DWORD64 time); // workaround
+	static void Clear(void);
 
 private: // auxiliary functions
-	static FUNC_CALL_STAT* GetCall(const INVOC_INFO& call);
-	static FUNC_CALL_STAT*& AddCall(const INVOC_INFO& call, int& invoc);
+	void AddStatClass(const CWinProfStatistics* stat);
 
 public:
 	static statistics_t& GetStats(void) {return stats;}

@@ -41,3 +41,6 @@
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
+
+CString DWORD64ToStr(DWORD64 x);
+CString DWORD64ToHexStr(DWORD64 x);

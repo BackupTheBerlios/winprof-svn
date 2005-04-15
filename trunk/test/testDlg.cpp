@@ -176,7 +176,7 @@ CString dword64tostr(DWORD64 x)
 
 void CtestDlg::OnBnClickedButton1()
 {
-	CFile f("calllog2.prof", CFile::modeRead);
+/*	CFile f("calllog2.prof", CFile::modeRead);
 	CALL_INFO ci;
 	CString s;
 	m_stats.Empty();
@@ -185,6 +185,13 @@ void CtestDlg::OnBnClickedButton1()
 		f.Read(&ci, sizeof(ci));
 		s.Format("%s\t%x\t%s\r\n", ci.type==CALL_INFO_START?"start":"end", ci.address, dword64tostr(ci.time));
 		m_stats += s;
+	}*/
+	for (int i=0; i<1000; i++)
+	{
+		m_stats += "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\n";
 	}
+	static int x=0;
+	x++;
+	Sleep(1000*x);
 	UpdateData(FALSE);
 }

@@ -15,6 +15,7 @@ public:
 	virtual int GetWidth(void) const {return 150;}
 	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
 	virtual bool IsVisible(void) const {return false;}
+	virtual void ClearCache(void) const {}
 	
 protected:
 	// a commonly used compare scenario
@@ -24,5 +25,5 @@ protected:
 		return (t1 < t2) ? -1 : 1;
 	}
 
-	static func2vect_t& func2vect;
+	static const func2vect_t& func2vect;
 }; // class CWinProfStatistics

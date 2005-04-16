@@ -1,14 +1,17 @@
 #pragma once
+#include "afxcmn.h"
 
 // CStatisticsDialog dialog
 class CWinProfDoc;
+class CStatManager;
+class CSymbolManager;
 
 class CStatisticsDialog : public CDialog
 {
 	DECLARE_DYNAMIC(CStatisticsDialog)
 
 public:
-	CStatisticsDialog(CWinProfDoc* pDoc, DWORD address, CWnd* pParent = NULL); // standard constructor
+	CStatisticsDialog(CStatManager& stat_mgr, CSymbolManager& symbol_mgr, DWORD address, CWnd* pParent = NULL); // standard constructor
 	virtual ~CStatisticsDialog();
 
 // Dialog Data
@@ -19,8 +22,11 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 private:
-	CString m_Address;
-	CString m_Name;
-	CString m_CallCount;
-	CString m_AvgRunTime;
+	DWORD address;
+	CStatManager& stat_manager;
+	CSymbolManager& symbol_manager;
+	CListCtrl m_StatList;
+
+public:
+	virtual BOOL OnInitDialog();
 };

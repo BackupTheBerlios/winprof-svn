@@ -213,6 +213,9 @@
 					RelativePath=".\AvgTimeStat.h">
 				</File>
 				<File
+					RelativePath=".\CallDepthStat.h">
+				</File>
+				<File
 					RelativePath=".\CommonDefs.h">
 				</File>
 				<File
@@ -220,6 +223,12 @@
 				</File>
 				<File
 					RelativePath=".\FunctionStat.h">
+				</File>
+				<File
+					RelativePath=".\MinMaxTimeStat.h">
+				</File>
+				<File
+					RelativePath=".\NetRunTimeStat.h">
 				</File>
 				<File
 					RelativePath=".\RunTimeStat.h">

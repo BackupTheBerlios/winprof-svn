@@ -8,13 +8,12 @@ public:
 	CWinProfStatistics(void) {}
 	virtual ~CWinProfStatistics(void) {}
 
-	virtual CString GetString(const INVOC_INFO& call) const = 0;
-	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const = 0;
-	virtual CString GetStatName(void) const = 0;
-	virtual stats_type GetStatID(void) const = 0;
-	virtual int GetWidth(void) const {return 150;}
+	virtual CString GetString(const INVOC_INFO& call) const {return CString();}
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {return 0;}
+	virtual CString GetStatName(void) const {return CString();}
+	virtual int GetWidth(void) const {return 100;}
 	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
-	virtual bool IsVisible(void) const {return false;}
+	virtual bool IsPerInvocation(void) const {return false;}
 	virtual void ClearCache(void) const {}
 	
 protected:

@@ -92,20 +92,10 @@ void CStatisticListView::OnStyleChanged(int /*nStyleType*/, LPSTYLESTRUCT /*lpSt
 void CStatisticListView::InsertLine(int lineNumber, const INVOC_INFO& invoc_info)
 {
 	CListCtrl& ctrl = GetListCtrl();
-	LV_ITEM lvi;
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
-	lvi.iItem = lineNumber;
-	lvi.lParam = lineNumber;
-	lvi.iSubItem = 0;
 
-	char buf[100];
-	itoa(lineNumber, buf, 10);
-	lvi.pszText =  buf;
-
-	lvi.iImage = lineNumber;
-	lvi.stateMask = LVIS_STATEIMAGEMASK;
-	lvi.state = INDEXTOSTATEIMAGEMASK(1);
-	ctrl.SetItemData(ctrl.InsertItem(&lvi), (DWORD_PTR)new LIST_ITEM_DATA(lineNumber, invoc_info.address));
+	ctrl.InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM | LVIF_STATE, lineNumber, 
+		Format("%d", lineNumber), INDEXTOSTATEIMAGEMASK(1), LVIS_STATEIMAGEMASK, lineNumber, 
+		reinterpret_cast<LPARAM>(new LIST_ITEM_DATA(lineNumber, invoc_info)));
 
 	// the function name is set manually
 	CString name = GetDocument()->symbol_manager.GetSymName(invoc_info.address);
@@ -116,11 +106,10 @@ void CStatisticListView::InsertLine(int lineNumber, const INVOC_INFO& invoc_info
 
 	// the rest of information
 	statistics_t& stats = GetDocument()->stat_manager.GetStats();
-	for(int j = 0; j < (int)stats.size(); j++)
+	for (int j = 0; j < (int)stats.size(); j++)
 	{
-		stats_type st = (stats_type)j;
-		if(stats[st]->IsVisible() == false) continue;
-		ctrl.SetItemText(lineNumber-1, j+2, stats[st]->GetString(invoc_info));
+		if (stats[j]->IsPerInvocation())
+			ctrl.SetItemText(lineNumber-1, j+2, stats[j]->GetString(invoc_info));
 	}
 }
 
@@ -134,33 +123,15 @@ int CStatisticListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	ModifyStyle(LVS_TYPEMASK, LVS_REPORT | LVS_SINGLESEL);
 	ListCtrl.SetExtendedStyle(ListCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
 
-	// building columns
-	LV_COLUMN lvc;
-	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
-
 	// the first 2 columns must always be the number and the function name
-	for(int i = 0; i < 2; ++i) {
-		lvc.iSubItem = i;
-		lvc.pszText = _ColumnName[i];
-		lvc.cx = _ColumnWidth[i];
-		lvc.fmt = _ColumnPlace[i];
-		ListCtrl.InsertColumn(i, &lvc);
-	}
+	for(int i = 0; i < 2; ++i)
+		ListCtrl.InsertColumn(i, _ColumnName[i], _ColumnPlace[i], _ColumnWidth[i], i);
 	
 	// build all the rest of columns
 	statistics_t& stats = GetDocument()->stat_manager.GetStats();
 	for(int i = 0; i < (int)stats.size(); i++) 
-	{
-		stats_type st = (stats_type)i;
-		if(stats[st]->IsVisible() == false) continue;
-		lvc.iSubItem = i+2;
-		char buf[100];
-		strcpy(buf, stats[st]->GetStatName().GetString());
-		lvc.pszText = buf;
-		lvc.cx = stats[st]->GetWidth();
-		lvc.fmt = stats[st]->GetColumnPlace();
-		ListCtrl.InsertColumn(i+2, &lvc);
-	}
+		if (stats[i]->IsPerInvocation())
+			ListCtrl.InsertColumn(i+2, stats[i]->GetStatName().GetString(), stats[i]->GetColumnPlace(), stats[i]->GetWidth(), i+2);
 
 	return 0;
 }
@@ -180,7 +151,7 @@ void CStatisticListView::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	if (item == -1) return;
 	CListCtrl& ctrl = GetListCtrl();
 	LIST_ITEM_DATA* data = (LIST_ITEM_DATA*)ctrl.GetItemData(item);
-	CStatisticsDialog dlg(GetDocument(), data->address);
+	CStatisticsDialog dlg(GetDocument()->stat_manager, GetDocument()->symbol_manager, data->invoc_info.address);
 	dlg.DoModal();
 }
 
@@ -203,9 +174,9 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 0:		// Line#
 		return d1->line - d2->line;
 	case 1:		// Function Name
-		return man->GetSymName(d1->address).Compare(man->GetSymName(d2->address));
+		return man->GetSymName(d1->invoc_info.address).Compare(man->GetSymName(d2->invoc_info.address));
 	default:	// A statistic
-		return stats->GetStats()[stats_type(column-2)]->StatCompare(INVOC_INFO(d1->address), INVOC_INFO(d2->address));
+		return stats->GetStats()[column-2]->StatCompare(d1->invoc_info, d2->invoc_info);
 	}
 	return 0; 
 } 
@@ -215,10 +186,6 @@ void CStatisticListView::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	for (int i=0; i<GetListCtrl().GetItemCount(); i++)
-	{
-		GetListCtrl().GetItemText(i, 1);
-	}
 	static int last_column = 0;
 	static int direction = 0;
 	if (last_column == pNMLV->iSubItem)

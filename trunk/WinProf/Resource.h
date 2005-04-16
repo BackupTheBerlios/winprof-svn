@@ -9,10 +9,7 @@
 #define IDR_WinProfTYPE                 129
 #define IDD_WAIT_TERMINATION_DIALOG     130
 #define IDD_STATISTICS_DIALOG           131
-#define IDC_ADDRESS_EDIT                1001
-#define IDC_NAME_EDIT                   1002
-#define IDC_CALL_COUNT_EDIT             1003
-#define IDC_AVG_RUNTIME_EDIT            1004
+#define IDC_STATISTICS_LIST             1001
 #define ID_PROJECT_OPENEXE              32771
 #define ID_BUTTON32774                  32774
 
@@ -22,7 +19,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        132
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1003
+#define _APS_NEXT_CONTROL_VALUE         1002
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

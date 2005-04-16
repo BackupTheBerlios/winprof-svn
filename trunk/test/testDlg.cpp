@@ -174,6 +174,23 @@ CString dword64tostr(DWORD64 x)
 	return s;
 }
 
+struct A
+{
+	virtual void f() {MessageBox(NULL, "A::f", NULL, MB_OK);}
+};
+
+struct B : public A
+{
+	virtual void f() {MessageBox(NULL, "B::f", NULL, MB_OK);}
+};
+struct C : public A
+{
+	virtual void f() {MessageBox(NULL, "C::f", NULL, MB_OK);}
+};
+struct D : public B, public C
+{
+};
+
 void CtestDlg::OnBnClickedButton1()
 {
 /*	CFile f("calllog2.prof", CFile::modeRead);
@@ -186,6 +203,9 @@ void CtestDlg::OnBnClickedButton1()
 		s.Format("%s\t%x\t%s\r\n", ci.type==CALL_INFO_START?"start":"end", ci.address, dword64tostr(ci.time));
 		m_stats += s;
 	}*/
+	D d;
+	A& a=(C&)d;
+	a.f();
 	for (int i=0; i<1000; i++)
 	{
 		m_stats += "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\n";

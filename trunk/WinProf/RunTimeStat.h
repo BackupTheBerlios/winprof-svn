@@ -1,9 +1,7 @@
 #pragma once
 
-#include "WinProfStatistics.h"
-#include "FunctionTreeView.h"
-#include "WinProfDoc.h"
 #include "FunctionStat.h"
+#include "WinProfDoc.h"
 
 class CStatHelperGet
 {
@@ -20,15 +18,9 @@ public:
 	virtual CString GetString(const INVOC_INFO& call) const
 		{return DWORD64ToStr(GetStatValue(call)*1000/CWinProfDoc::m_Frequency);}
 
-	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const 
-		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1), GetStatValue(c2));}
-
 	virtual CString GetStatName(void) const 
 		{return "Run Time (ms)";}
 
-	virtual stats_type GetStatID(void) const
-		{return RUN_TIME;}
-
-	virtual bool IsVisible(void) const
+	virtual bool IsPerInvocation(void) const
 		{return true;}
 };

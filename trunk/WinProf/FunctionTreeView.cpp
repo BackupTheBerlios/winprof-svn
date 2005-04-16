@@ -141,7 +141,7 @@ void CFunctionTreeView::FillTheTree()
 			// back references
 			DWORD64 runtime = call_info.time - invoc_info_ex.time;
 			invoc_info = reinterpret_cast<INVOC_INFO*>(ctrl.GetItemData(current));
-			GetDocument()->stat_manager.UpdateRunTime(*invoc_info, runtime);
+			GetDocument()->stat_manager.UpdateRunTime(*invoc_info, current, runtime);
 
 			stack.pop_back();
 			current = ctrl.GetParentItem(current);

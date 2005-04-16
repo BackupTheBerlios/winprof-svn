@@ -43,4 +43,4 @@
 
 
 CString DWORD64ToStr(DWORD64 x);
-CString DWORD64ToHexStr(DWORD64 x);
+CString Format(LPCTSTR format, ...);

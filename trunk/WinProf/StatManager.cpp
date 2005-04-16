@@ -3,9 +3,12 @@
 #include "WinProfStatistics.h"
 #include "FunctionStat.h"
 #include "RunTimeStat.h"
+#include "NetRunTimeStat.h"
+#include "CallDepthStat.h"
 #include "TotalTimeStat.h"
 #include "CountCallsStat.h"
 #include "AvgTimeStat.h"
+#include "MinMaxTimeStat.h"
 #include <hash_map>
 #include <vector>
 
@@ -14,27 +17,31 @@ using namespace std;
 CStatManager::CStatManager(void)
 {
 	AddStatClass(new CRunTimeStat());
+	AddStatClass(static_cast<CFunctionStat<DWORD64, CStatHelperNetRunTime>*>(new CNetRunTimeStat()));
+	AddStatClass(new CCallDepthStat());
 	AddStatClass(new CCountCallsStat());
-	AddStatClass(new CTotalTimeStat());
+	AddStatClass(new CMinTimeStat());
 	AddStatClass(static_cast<CCountCallsStat*>(new CAvgTimeStat()));
+	AddStatClass(new CMaxTimeStat());
+	AddStatClass(static_cast<CTotalSquaredTimeStat*>(new CStdDevTimeStat()));
 }
 
 CStatManager::~CStatManager(void)
 {
-	for(int i = 0; i < (int)stats.size(); i++)
-		delete stats[(stats_type)i];
+	for (statistics_t::const_iterator i = stats.begin(); i != stats.end(); ++i)
+		delete *i;
 }
 
 void CStatManager::AddStatClass(const CWinProfStatistics* stat)
 {
-	stats[stat->GetStatID()] = stat;
+	stats.push_back(stat);
 }
 
 void CStatManager::Clear(void)
 {
 	func2vect.clear();
 	for (statistics_t::const_iterator iter = stats.begin(); iter != stats.end(); ++iter)
-		iter->second->ClearCache();
+		(*iter)->ClearCache();
 }
 
 INT CStatManager::UpdateStatsWith(const INVOC_INFO& call)
@@ -46,7 +53,7 @@ INT CStatManager::UpdateStatsWith(const INVOC_INFO& call)
 	return (int)vec.size();
 }
 
-void CStatManager::UpdateRunTime(const INVOC_INFO& call, DWORD64 time) 
+void CStatManager::UpdateRunTime(const INVOC_INFO& call, HTREEITEM item, DWORD64 time) 
 {
 	func2vect_t::iterator it = func2vect.find(call.address);
 	ASSERT(it != func2vect.end());
@@ -55,6 +62,7 @@ void CStatManager::UpdateRunTime(const INVOC_INFO& call, DWORD64 time)
 	int pos = call.invocation - 1;
 	ASSERT(pos >= 0 && pos < (int)calls.size());
 
+	calls[pos].treeitem = item;
 	calls[pos].runtime = time;
 }
 

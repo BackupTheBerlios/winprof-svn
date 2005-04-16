@@ -19,12 +19,12 @@ CString DWORD64ToStr(DWORD64 x)
 	return s;
 }
 
-CString DWORD64ToHexStr(DWORD64 x)
+CString Format(LPCTSTR format, ...)
 {
-	if (x == 0) return "0";
-	DWORD low = (DWORD)(x & ((1<<32)-1)), high = (DWORD)(x>>32);
+	va_list args;
 	CString s;
-	if (high) s.Format("%x", high);
-	s.AppendFormat("%x", low);
+	va_start(args, format);
+	s.FormatV(format, args);
+	va_end(args);
 	return s;
 }

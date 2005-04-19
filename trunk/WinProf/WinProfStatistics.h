@@ -15,6 +15,8 @@ public:
 	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
 	virtual bool IsPerInvocation(void) const {return false;}
 	virtual void ClearCache(void) const {}
+	virtual bool Satisfies(const INVOC_INFO& iv, double bound, cmp_oper oper) const
+		{return false;} // a stub value
 	
 protected:
 	// a commonly used compare scenario

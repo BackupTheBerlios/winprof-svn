@@ -38,3 +38,7 @@ class CWinProfStatistics;
 typedef std::vector<FUNC_CALL_STAT> calls_vector_t;
 typedef stdext::hash_map<DWORD/*address*/, calls_vector_t> func2vect_t;
 typedef std::vector<const CWinProfStatistics*> statistics_t;
+
+class CFilter;
+typedef bool(*logical_oper)(const CFilter*, const CFilter*, const INVOC_INFO&);
+typedef bool(*cmp_oper)(double, double);	

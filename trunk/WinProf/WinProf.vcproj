@@ -171,6 +171,13 @@
 					RelativePath=".\StatManager.cpp">
 				</File>
 			</Filter>
+			<Filter
+				Name="Filters"
+				Filter="">
+				<File
+					RelativePath=".\Filter.cpp">
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -241,6 +248,25 @@
 				</File>
 				<File
 					RelativePath=".\WinProfStatistics.h">
+				</File>
+			</Filter>
+			<Filter
+				Name="Filters"
+				Filter="">
+				<File
+					RelativePath=".\AtomFilter.h">
+				</File>
+				<File
+					RelativePath=".\CmpOper.h">
+				</File>
+				<File
+					RelativePath=".\ComplFilter.h">
+				</File>
+				<File
+					RelativePath=".\Filter.h">
+				</File>
+				<File
+					RelativePath=".\LogicalOper.h">
 				</File>
 			</Filter>
 		</Filter>

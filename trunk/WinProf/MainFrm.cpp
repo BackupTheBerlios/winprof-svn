@@ -15,6 +15,7 @@
 #define new DEBUG_NEW
 #endif
 
+#include "AtomFilter.h"
 
 // CMainFrame
 

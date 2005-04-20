@@ -1,7 +1,6 @@
 #include "StdAfx.h"
 #include "StatManager.h"
 #include "WinProfStatistics.h"
-#include "FunctionStat.h"
 #include "RunTimeStat.h"
 #include "NetRunTimeStat.h"
 #include "CallDepthStat.h"
@@ -16,14 +15,14 @@ using namespace std;
 
 CStatManager::CStatManager(void)
 {
-	AddStatClass(new CRunTimeStat());
+	/*AddStatClass(new CRunTimeStat());
 	AddStatClass(static_cast<CFunctionStat<DWORD64, CStatHelperNetRunTime>*>(new CNetRunTimeStat()));
 	AddStatClass(new CCallDepthStat());
 	AddStatClass(new CCountCallsStat());
 	AddStatClass(new CMinTimeStat());
 	AddStatClass(static_cast<CCountCallsStat*>(new CAvgTimeStat()));
 	AddStatClass(new CMaxTimeStat());
-	AddStatClass(static_cast<CTotalSquaredTimeStat*>(new CStdDevTimeStat()));
+	AddStatClass(static_cast<CTotalSquaredTimeStat*>(new CStdDevTimeStat())); */
 }
 
 CStatManager::~CStatManager(void)
@@ -70,6 +69,7 @@ func2vect_t CStatManager::func2vect;
 statistics_t CStatManager::stats;
 
 const func2vect_t& CWinProfStatistics::func2vect(CStatManager::GetDataBaseRef());
+const statistics_t& CWinProfStatistics::stats(CStatManager::GetStats());
 
-template <typename T, typename Function>
-typename CFunctionStat<T, Function>::cache_map_t CFunctionStat<T, Function>::cache;
+//template <typename T, typename Function>
+//typename CFunctionStat<T, Function>::cache_map_t CFunctionStat<T, Function>::cache;

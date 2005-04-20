@@ -1,21 +1,24 @@
 #pragma once
 
-#include "FunctionStat.h"
+#include "WinProfStatistics.h"
 
-class CStatHelperSize
+class CCountCallsStat : public CWinProfStatistics
 {
-public:
-	int operator()(const calls_vector_t& v, const INVOC_INFO& call) {return (int)v.size();}
-};
-
-class CCountCallsStat : public CFunctionStat<int, CStatHelperSize>
-{
-public:
-	CCountCallsStat(void) : CFunctionStat<int, CStatHelperSize>(CStatHelperSize()) {}
-
 	virtual CString GetString(const INVOC_INFO& call) const
-		{return Format("%d", GetStatValue(call));}
-
+		{return Format("%d", GetStatValue(call).int_val);}
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
+		{return CWinProfStatistics::StatCompare<int>(GetStatValue(c1).int_val, GetStatValue(c2).int_val);}
 	virtual CString GetStatName(void) const
 		{return "Call Count";}
+	virtual bool IsPerFunciton(void) const 
+		{return true;}
+	
+protected:
+	// calculate stat value
+	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const
+	{
+		stat_val_t val;
+		val.int_val = (int)v.size();
+		return val;
+	}
 };

@@ -3,7 +3,6 @@
 #include "WinProfStatistics.h"
 #include <hash_map>
 
-template <typename T, typename Function>
 class CFunctionStat : public CWinProfStatistics
 {
 public:

@@ -1,39 +1,39 @@
 #pragma once
 
-#include "FunctionStat.h"
+#include "WinProfStatistics.h"
 
-class CStatHelperSum
+class CTotalTimeStat : public CWinProfStatistics
 {
-public:
-	DWORD64 operator() (const calls_vector_t& v, const INVOC_INFO& call)
+	virtual CString GetString(const INVOC_INFO& call) const 
+		{return DWORD64ToStr(GetStatValue(call).dw64_val*1000/CWinProfDoc::m_Frequency);}
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
+		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
+	virtual bool IsPerFunciton(void) const 
+		{return true;}
+	
+protected:
+	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const
 	{
-		DWORD64 sum = 0;
+		stat_val_t val;
+		val.dw64_val = 0;
 		for (calls_vector_t::const_iterator i = v.begin(); i != v.end(); ++i)
-			sum += i->runtime;
-		return sum;
+			val.dw64_val += i->runtime;
+		return val;
 	}
 };
 
-class CStatHelperSumSquared
+class CTotalSquaredTimeStat : public CWinProfStatistics
 {
-public:
-	double operator() (const calls_vector_t& v, const INVOC_INFO& call)
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
+		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
+
+protected:
+	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const
 	{
-		double sum = 0;
+		stat_val_t val;
+		val.dw64_val = 0;
 		for (calls_vector_t::const_iterator i = v.begin(); i != v.end(); ++i)
-			sum += i->runtime * i->runtime;
-		return sum;
+			val.dw64_val += i->runtime * i->runtime;
+		return val;
 	}
-};
-
-class CTotalTimeStat : public CFunctionStat<DWORD64, CStatHelperSum>
-{
-public:
-	CTotalTimeStat(void) : CFunctionStat<DWORD64, CStatHelperSum>(CStatHelperSum()) {}
-};
-
-class CTotalSquaredTimeStat : public CFunctionStat<double, CStatHelperSumSquared>
-{
-public:
-	CTotalSquaredTimeStat(void) : CFunctionStat<double, CStatHelperSumSquared>(CStatHelperSumSquared()) {}
 };

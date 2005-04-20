@@ -229,9 +229,6 @@
 					RelativePath=".\CountCallsStat.h">
 				</File>
 				<File
-					RelativePath=".\FunctionStat.h">
-				</File>
-				<File
 					RelativePath=".\MinMaxTimeStat.h">
 				</File>
 				<File
@@ -260,13 +257,10 @@
 					RelativePath=".\CmpOper.h">
 				</File>
 				<File
-					RelativePath=".\ComplFilter.h">
+					RelativePath=".\CompositeFilter.h">
 				</File>
 				<File
 					RelativePath=".\Filter.h">
-				</File>
-				<File
-					RelativePath=".\LogicalOper.h">
 				</File>
 			</Filter>
 		</Filter>

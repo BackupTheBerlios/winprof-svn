@@ -27,9 +27,11 @@ private: // auxiliary functions
 public:
 	static statistics_t& GetStats(void) {return stats;}
 	static func2vect_t& GetDataBaseRef(void) {return func2vect;}
+	static stname2index_t& GetStName2Index(void) {return stname2index;}
 	static CTreeCtrl& GetTreeCtrl(void) {return static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl();}
 
 private:
 	static func2vect_t func2vect;
 	static statistics_t stats;
+	static stname2index_t stname2index;
 }; // class CStatManager

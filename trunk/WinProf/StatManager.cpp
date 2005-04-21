@@ -15,14 +15,16 @@ using namespace std;
 
 CStatManager::CStatManager(void)
 {
-	/*AddStatClass(new CRunTimeStat());
-	AddStatClass(static_cast<CFunctionStat<DWORD64, CStatHelperNetRunTime>*>(new CNetRunTimeStat()));
-	AddStatClass(new CCallDepthStat());
-	AddStatClass(new CCountCallsStat());
-	AddStatClass(new CMinTimeStat());
-	AddStatClass(static_cast<CCountCallsStat*>(new CAvgTimeStat()));
-	AddStatClass(new CMaxTimeStat());
-	AddStatClass(static_cast<CTotalSquaredTimeStat*>(new CStdDevTimeStat())); */
+	AddStatClass(new CTotalTimeStat);
+	AddStatClass(new CTotalSquaredTimeStat);
+	AddStatClass(new CRunTimeStat);
+	AddStatClass(new CNetRunTimeStat);
+	AddStatClass(new CCallDepthStat);
+	AddStatClass(new CCountCallsStat);
+	AddStatClass(new CMinTimeStat);
+	AddStatClass(new CAvgTimeStat);
+	AddStatClass(new CMaxTimeStat);
+	AddStatClass(new CStdDevTimeStat);
 }
 
 CStatManager::~CStatManager(void)
@@ -33,6 +35,9 @@ CStatManager::~CStatManager(void)
 
 void CStatManager::AddStatClass(const CWinProfStatistics* stat)
 {
+	int id = (int)stats.size();
+	stname2index[stat->GetStatName()] = id;
+	stat->SetId(id);
 	stats.push_back(stat);
 }
 
@@ -67,6 +72,8 @@ void CStatManager::UpdateRunTime(const INVOC_INFO& call, HTREEITEM item, DWORD64
 
 func2vect_t CStatManager::func2vect;
 statistics_t CStatManager::stats;
+stname2index_t CStatManager::stname2index;
+cache_t CWinProfStatistics::cache;
 
 const func2vect_t& CWinProfStatistics::func2vect(CStatManager::GetDataBaseRef());
 const statistics_t& CWinProfStatistics::stats(CStatManager::GetStats());

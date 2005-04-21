@@ -60,8 +60,8 @@ BOOL CStatisticsDialog::OnInitDialog()
 	for (statistics_t::const_iterator iter = stats.begin(); iter != stats.end(); ++iter)
 	{
 		const CWinProfStatistics *p = *iter;
-		if (!p->IsPerInvocation())
-			m_StatList.SetItemText(m_StatList.InsertItem(counter++, p->GetStatName()), 1, p->GetString(invoc_info));
+		if (p->IsPerFunction())
+			m_StatList.SetItemText(m_StatList.InsertItem(counter++, p->GetStatCaption()), 1, p->GetString(invoc_info));
 	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control

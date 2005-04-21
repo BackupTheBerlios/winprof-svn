@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <hash_map>
+#include <string>
 
 class CSymbolManager;
 class CStatManager;
@@ -34,18 +35,22 @@ public:
 	DWORD64 runtime;
 }; // class FUNC_CALL_STAT
 
+typedef union {
+	DWORD64 dw64_val;
+	int int_val;
+	double double_val;
+} stat_val_t;
+
 class CWinProfStatistics;
 typedef std::vector<FUNC_CALL_STAT> calls_vector_t;
 typedef stdext::hash_map<DWORD/*address*/, calls_vector_t> func2vect_t;
 typedef std::vector<const CWinProfStatistics*> statistics_t;
-typedef stdext::hash_map<char*, int> stname2index_t;
+typedef stdext::hash_map<INVOC_INFO, stat_val_t> stat_cache_t;
+typedef std::vector<stat_cache_t> cache_t;
+typedef stdext::hash_map<std::string, int> stname2index_t;
 
 class CFilter;
 typedef bool(*logical_oper)(const CFilter*, const CFilter*, const INVOC_INFO&);
 
 typedef enum{LEQ=0, LES, GEQ, GRT, EQV} cmp_oper;
 
-typedef union {
-	DWORD64 dw64_val;
-	int int_val;
-} stat_val_t;

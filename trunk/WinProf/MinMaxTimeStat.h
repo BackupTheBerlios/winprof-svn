@@ -9,10 +9,13 @@ public:
 		{return DWORD64ToStr(GetStatValue(call).dw64_val*1000/CWinProfDoc::m_Frequency);}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
-	virtual CString GetStatName(void) const 
+	virtual CString GetStatCaption(void) const 
 		{return "Min Run Time (ms)";}
+	virtual string GetStatName() const
+		{return "MinTimeStat";}
 	virtual bool IsPerFunction(void) const
 		{return true;}
+	virtual bool IsCacheable() const {return true;}
 
 protected:
 	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const
@@ -35,10 +38,13 @@ public:
 		{return DWORD64ToStr(GetStatValue(call).dw64_val*1000/CWinProfDoc::m_Frequency);}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
-	virtual CString GetStatName(void) const 
+	virtual CString GetStatCaption(void) const 
 		{return "Max Run Time (ms)";}
+	virtual string GetStatName() const
+		{return "MaxTimeStat";}
 	virtual bool IsPerFunction(void) const
 		{return true;}
+	virtual bool IsCacheable() const {return true;}
 
 protected:
 	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const

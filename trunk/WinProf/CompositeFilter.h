@@ -10,7 +10,7 @@ public:
 		, f2(v2)
 		, oper(op)
 	{}
-	virtual ~CCompositeFilter(void) {}
+	virtual ~CCompositeFilter(void) {delete f1; delete f2;}
 
 	// make use of a filter
 	virtual bool Satisfies(const INVOC_INFO& iv) const

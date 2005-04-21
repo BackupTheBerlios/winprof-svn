@@ -106,10 +106,11 @@ void CStatisticListView::InsertLine(int lineNumber, const INVOC_INFO& invoc_info
 
 	// the rest of information
 	statistics_t& stats = GetDocument()->stat_manager.GetStats();
+	int counter = 2;
 	for (int j = 0; j < (int)stats.size(); j++)
 	{
 		if (stats[j]->IsPerInvocation())
-			ctrl.SetItemText(lineNumber-1, j+2, stats[j]->GetString(invoc_info));
+			ctrl.SetItemText(lineNumber-1, counter++, stats[j]->GetString(invoc_info));
 	}
 }
 
@@ -129,9 +130,10 @@ int CStatisticListView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	// build all the rest of columns
 	statistics_t& stats = GetDocument()->stat_manager.GetStats();
+	int counter = 2;
 	for(int i = 0; i < (int)stats.size(); i++) 
 		if (stats[i]->IsPerInvocation())
-			ListCtrl.InsertColumn(i+2, stats[i]->GetStatName().GetString(), stats[i]->GetColumnPlace(), stats[i]->GetWidth(), i+2);
+			ListCtrl.InsertColumn(counter++, stats[i]->GetStatCaption(), stats[i]->GetColumnPlace(), stats[i]->GetWidth(), i+2);
 
 	return 0;
 }

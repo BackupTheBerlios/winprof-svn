@@ -34,5 +34,3 @@ private:
 public:
 	static const statistics_t& stats;
 };
-
-const statistics_t& CAtomFilter::stats = CStatManager::GetStats();

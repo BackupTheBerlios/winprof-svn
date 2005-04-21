@@ -1,5 +1,6 @@
 #include "StdAfx.h"
 #include "Filter.h"
+#include "AtomFilter.h"
 #include "CompositeFilter.h"
 
 CFilter* CFilter::CreateNew(const CFilter* f, logical_oper oper)
@@ -19,3 +20,5 @@ public:
 	static bool OR(const CFilter* f1, const CFilter* f2, const INVOC_INFO& iv)
 		{return f1->Satisfies(iv) || f2->Satisfies(iv);}
 };
+
+const statistics_t& CAtomFilter::stats = CStatManager::GetStats();

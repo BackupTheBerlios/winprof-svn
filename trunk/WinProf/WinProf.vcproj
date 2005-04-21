@@ -177,6 +177,9 @@
 				<File
 					RelativePath=".\Filter.cpp">
 				</File>
+				<File
+					RelativePath=".\FilterManager.cpp">
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -261,6 +264,9 @@
 				</File>
 				<File
 					RelativePath=".\Filter.h">
+				</File>
+				<File
+					RelativePath=".\FilterManager.h">
 				</File>
 			</Filter>
 		</Filter>

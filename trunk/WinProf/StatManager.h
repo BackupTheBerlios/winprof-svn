@@ -15,10 +15,8 @@ public:
 
 	// make these functions non static to ensure that the object is created
 	// if so, then all the allocated data is deleted "automatically" in destructor
-
-	// returns the invocation number
 	INT UpdateStatsWith(const INVOC_INFO& call);
-	void UpdateRunTime(const INVOC_INFO& call, HTREEITEM item, DWORD64 time); // workaround
+	void UpdateRunTime(const INVOC_INFO& call, HTREEITEM item, DWORD64 time);
 	static void Clear(void);
 
 private: // auxiliary functions

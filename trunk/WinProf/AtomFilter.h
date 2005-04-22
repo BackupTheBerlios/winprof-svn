@@ -15,6 +15,8 @@ public:
 	{}
 	virtual ~CAtomFilter(void) {}
 
+	virtual bool IsDependandOn(CString n) const
+		{return (name == n);}
 	// make use of a filter
 	virtual bool Satisfies(const INVOC_INFO& iv) const
 	{
@@ -29,7 +31,7 @@ private:
 	DWORD func; // hold by address; 0 means no function
 	int stat; // hold by statistics number; -1 means no stat
 	stat_val_t bound;
-	cmp_oper oper; // enum, defined in CommonDefs.h
+	cmp_oper oper; // enum, defined in Filter.cpp
 
 public:
 	static const statistics_t& stats;

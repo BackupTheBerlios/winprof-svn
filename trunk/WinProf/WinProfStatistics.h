@@ -4,29 +4,7 @@
 #include <string>
 
 using namespace std;
-/*template<typename T> 
-class CCmpEnv {
-public:
-	enum{SIZE = 5};
-	static bool Leq(T v1, T v2) {return v1 <= v2;}
-	static bool Les(T v1, T v2) {return v1 < v2;}
-	static bool Geq(T v1, T v2) {return v1 >= v2;}
-	static bool Grt(T v1, T v2) {return v1 > v2;}
-	static bool Eqv(T v1, T v2) {return v1 == v2;}
-
-	typedef bool(*cmp_func)(T, T);
-	
-	static cmp_func cmp_func_vect[SIZE];
-}; // class CmpEnv
-
-template<typename T> 
-static CCmpEnv<T>::cmp_func CCmpEnv<T>::cmp_func_vect = {
-	CCmpEnv<T>::Leq, 
-	CCmpEnv<T>::Les, 
-	CCmpEnv<T>::Geq, 
-	CCmpEnv<T>::Grt, 
-	CCmpEnv<T>::Eqv
-};*/
+using namespace CmpOper;
 
 class CWinProfStatistics 
 {
@@ -34,27 +12,17 @@ public:
 	CWinProfStatistics(void) {cache.push_back(stat_cache_t());}
 	virtual ~CWinProfStatistics(void) {}
 
-	// returns the statistics value as a string
-	virtual CString GetString(const INVOC_INFO& call) const {return CString();}
-	// sorting_by support
-	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {return 0;}
-	// returns the column name, as it appears to user in GUI
-	virtual CString GetStatCaption(void) const {return CString();}
-	// returns stat name to be used by other stats
-	virtual string GetStatName(void) const = 0;
-	// width of column, as it appears to user in GUI
-	virtual int GetWidth(void) const {return 100;}
-	// where in column the text is placed
-	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;}
-	// defines stats type
-	virtual bool IsPerInvocation(void) const {return false;}
-	virtual bool IsPerFunction(void) const {return false;}
-	// filters support
-	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const {return false;}
-	// used when user enters a string as a bound value
-	virtual stat_val_t GetNumerical(CString str) const {return stat_val_t();}
-	// does the statistic use cache
-	virtual bool IsCacheable() const {return false;}
+	virtual CString GetString(const INVOC_INFO& call) const {ASSERT(false); return CString();} // returns the statistics value as a string
+	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {ASSERT(false); return 0;} // sorting_by support
+	virtual CString GetStatCaption(void) const {ASSERT(false); return CString();} // returns the column name, as it appears to user in GUI
+	virtual string GetStatName(void) const = 0; // returns stat name to be used by other stats
+	virtual int GetWidth(void) const {return 100;} // width of column, as it appears to user in GUI
+	virtual int GetColumnPlace(void) const {return LVCFMT_LEFT;} // where in column the text is placed
+	virtual bool IsPerInvocation(void) const {return false;} // appears in the left pane?
+	virtual bool IsPerFunction(void) const {return false;} // appears in stat_dialog?
+	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const {ASSERT(false); return false;} // filters support
+	virtual stat_val_t GetNumerical(CString str) const {ASSERT(false); return stat_val_t();} // used when user enters a string as the atom filter bound value
+	virtual bool IsCacheable() const {return false;} // does the statistic use cache?
 	
 protected:
 	// calculate stat value
@@ -67,7 +35,7 @@ public:
 		if (IsCacheable() && SearchCache(call, value)) return value;
 		func2vect_t::const_iterator it = func2vect.find(call.address);
 		ASSERT(it != func2vect.end());
-		value = CalculateStatVal(it->second, call); // cache updated inside if needed
+		value = CalculateStatVal(it->second, call);
 		if (IsCacheable()) AddToCache(call, value);
 		return value;
 	}

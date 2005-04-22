@@ -17,6 +17,15 @@ public:
 		{return "AvgTimeStat";}
 	virtual bool IsPerFunction(void) const 
 		{return true;}
+	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
+		{return CmpOper::cmp_oper_vect_dw64[oper](GetStatValue(iv).dw64_val, bound.dw64_val);}
+	virtual stat_val_t GetNumerical(CString str) const
+	{
+		stat_val_t val;
+		val.dw64_val = _atoi64(str);
+		return val;
+	}
+
 
 protected:
 	stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const
@@ -42,6 +51,14 @@ public:
 		{return "StdDevTimeStat";}
 	virtual bool IsPerFunction(void) const 
 		{return true;}
+	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
+		{return CmpOper::cmp_oper_vect_dw64[oper](GetStatValue(iv).dw64_val, bound.dw64_val);}
+	virtual stat_val_t GetNumerical(CString str) const
+	{
+		stat_val_t val;
+		val.dw64_val = _atoi64(str);
+		return val;
+	}
 
 protected:
 	stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const

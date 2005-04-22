@@ -10,12 +10,13 @@
 #include "WinProfDoc.h"
 #include "WaitTerminationDialog.h"
 #include ".\mainfrm.h"
+#include <string>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
 
-#include "AtomFilter.h"
+#include "FilterManager.h"
 
 // CMainFrame
 
@@ -51,6 +52,23 @@ CMainFrame::~CMainFrame()
 
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+//sdoc******************************************************
+	
+	//CString expr("x & y");
+	//CString expr("x & y | z");
+/*	CString expr("(x | y) & ~ z | t");
+
+	CFilterManager man;
+	vector<CString> infix, postfix;
+	man.BuildInfixFormStack(expr, infix);
+	man.BuildPostfix(infix, postfix);
+	CString out;
+	for(int i = 0; i < (int)postfix.size(); i++) {
+		CString tmp = out;
+		out.Format("%s%s%s", (const char*)tmp, " ", (const char*)postfix[i]);
+	}
+	MessageBox(out); */
+//**********************************************************
 	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	

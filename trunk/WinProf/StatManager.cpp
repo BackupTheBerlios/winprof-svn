@@ -77,6 +77,3 @@ cache_t CWinProfStatistics::cache;
 
 const func2vect_t& CWinProfStatistics::func2vect(CStatManager::GetDataBaseRef());
 const statistics_t& CWinProfStatistics::stats(CStatManager::GetStats());
-
-//template <typename T, typename Function>
-//typename CFunctionStat<T, Function>::cache_map_t CFunctionStat<T, Function>::cache;

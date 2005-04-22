@@ -52,5 +52,26 @@ typedef stdext::hash_map<std::string, int> stname2index_t;
 class CFilter;
 typedef bool(*logical_oper)(const CFilter*, const CFilter*, const INVOC_INFO&);
 
-typedef enum{LEQ=0, LES, GEQ, GRT, EQV} cmp_oper;
+namespace CmpOper 
+{
+	typedef enum{LEQ=0, LES, GEQ, GRT, EQV, NEQ, CMP_OPER_COUNT} cmp_oper;
+	extern const char* caption[CMP_OPER_COUNT];
 
+	template<typename T> bool Leq(const T& v1, const T& v2) {return v1 <= v2;}
+	template<typename T> bool Les(const T& v1, const T& v2) {return v1 < v2;}
+	template<typename T> bool Geq(const T& v1, const T& v2)	{return v1 >= v2;}
+	template<typename T> bool Grt(const T& v1, const T& v2) {return v1 > v2;}
+	template<typename T> bool Eqv(const T& v1, const T& v2)	{return v1 == v2;}
+	template<typename T> bool Neq(const T& v1, const T& v2)	{return v1 != v2;}
+
+	typedef bool(*cmp_oper_func_double)(const double&, const double&);
+	typedef bool(*cmp_oper_func_dw64)(const DWORD64&, const DWORD64&);
+	typedef bool(*cmp_oper_func_int)(const int&, const int&);
+
+	extern cmp_oper_func_double cmp_oper_vect_double[CMP_OPER_COUNT];
+	extern cmp_oper_func_int cmp_oper_vect_int[CMP_OPER_COUNT];
+	extern cmp_oper_func_dw64 cmp_oper_vect_dw64[CMP_OPER_COUNT];
+}; // namespace CmpOper 
+
+typedef stdext::hash_map<std::string, CFilter*> filname2fil_t;
+typedef std::vector<const INVOC_INFO*> filtered_list_t;

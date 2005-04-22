@@ -14,6 +14,14 @@ class CCountCallsStat : public CWinProfStatistics
 		{return "CountCallsStat";}
 	virtual bool IsPerFunction(void) const 
 		{return true;}
+	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
+		{return CmpOper::cmp_oper_vect_int[oper](GetStatValue(iv).int_val, bound.int_val);}
+	virtual stat_val_t GetNumerical(CString str) const
+	{
+		stat_val_t val;
+		val.int_val = atoi(str);
+		return val;
+	}
 	
 protected:
 	// calculate stat value

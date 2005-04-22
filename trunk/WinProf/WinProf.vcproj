@@ -257,9 +257,6 @@
 					RelativePath=".\AtomFilter.h">
 				</File>
 				<File
-					RelativePath=".\CmpOper.h">
-				</File>
-				<File
 					RelativePath=".\CompositeFilter.h">
 				</File>
 				<File

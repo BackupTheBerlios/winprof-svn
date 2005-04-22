@@ -10,7 +10,14 @@ public:
 		, f2(v2)
 		, oper(op)
 	{}
-	virtual ~CCompositeFilter(void) {delete f1; delete f2;}
+	virtual ~CCompositeFilter(void) {}
+
+	virtual bool IsDependandOn(CString n) const
+	{
+		bool dep = f1->IsDependandOn(n);
+		if (f2 != NULL) dep = dep || f2->IsDependandOn(n);
+		return dep;
+	}
 
 	// make use of a filter
 	virtual bool Satisfies(const INVOC_INFO& iv) const

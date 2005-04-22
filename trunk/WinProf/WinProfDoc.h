@@ -5,6 +5,7 @@
 
 #include "SymbolManager.h"
 #include "StatManager.h"
+#include "FilterManager.h"
 #include "..\CallMon\CallMon.h"
 #include <list>
 
@@ -18,6 +19,7 @@ protected: // create from serialization only
 public:
 	CSymbolManager symbol_manager;
 	CStatManager stat_manager;
+	CFilterManager filter_manager;
 	CString m_ExeFileName;
 	std::list<CALL_INFO> call_info;
 	static DWORD64 m_Frequency;

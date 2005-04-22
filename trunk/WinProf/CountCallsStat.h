@@ -4,8 +4,8 @@
 
 class CCountCallsStat : public CWinProfStatistics
 {
-	virtual CString GetString(const INVOC_INFO& call) const
-		{return Format("%d", GetStatValue(call).int_val);}
+	virtual CString ToString(stat_val_t val) const
+		{return Format("%d", val.int_val);}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<int>(GetStatValue(c1).int_val, GetStatValue(c2).int_val);}
 	virtual CString GetStatCaption(void) const

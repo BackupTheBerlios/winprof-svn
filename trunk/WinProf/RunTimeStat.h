@@ -8,8 +8,8 @@ class CRunTimeStat : public CWinProfStatistics
 public:
 	CRunTimeStat(void) {}
 
-	virtual CString GetString(const INVOC_INFO& call) const
-		{return DWORD64ToStr(GetStatValue(call).dw64_val*1000/CWinProfDoc::m_Frequency);}
+	virtual CString ToString(stat_val_t val) const
+		{return DWORD64ToStr(val.dw64_val*1000/CWinProfDoc::m_Frequency);}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
 	virtual CString GetStatCaption(void) const 

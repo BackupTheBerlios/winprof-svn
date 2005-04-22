@@ -24,9 +24,8 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
-	ON_UPDATE_COMMAND_UI_RANGE(AFX_ID_VIEW_MINIMUM, AFX_ID_VIEW_MAXIMUM, OnUpdateViewStyles)
-	ON_COMMAND_RANGE(AFX_ID_VIEW_MINIMUM, AFX_ID_VIEW_MAXIMUM, OnViewStyle)
 	ON_COMMAND(ID_PROJECT_OPENEXE, OnProjectOpenExe)
+	ON_COMMAND(ID_PROJECT_FILTER, OnProjectFilter)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -102,12 +101,26 @@ BOOL CMainFrame::OnCreateClient(LPCREATESTRUCT /*lpcs*/,
 	if (!m_wndSplitter.CreateStatic(this, 1, 2))
 		return FALSE;
 
-	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(250, 100), pContext) ||
-		!m_wndSplitter.CreateView(0, 1, RUNTIME_CLASS(CStatisticListView), CSize(100, 100), pContext))
+	if (!m_wndSplitter.CreateView(0, 0, RUNTIME_CLASS(CFunctionTreeView), CSize(250, 100), pContext))
 	{
 		m_wndSplitter.DestroyWindow();
 		return FALSE;
 	}
+
+	if (!m_wndSplitter2.CreateStatic(&m_wndSplitter, 2, 1, WS_CHILD | WS_VISIBLE | WS_BORDER, m_wndSplitter.IdFromRowCol(0, 1)))
+	{
+		m_wndSplitter.DestroyWindow();
+		return FALSE;
+	}
+
+	if (!m_wndSplitter2.CreateView(0, 0, RUNTIME_CLASS(CStatisticListView), CSize(100, 300), pContext) ||
+		!m_wndSplitter2.CreateView(1, 0, RUNTIME_CLASS(CStatisticListView), CSize(100, 100), pContext))
+	{
+		m_wndSplitter.DestroyWindow();
+		m_wndSplitter2.DestroyWindow();
+		return FALSE;
+	}
+	
 	return TRUE;
 }
 
@@ -142,7 +155,14 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 CStatisticListView* CMainFrame::GetRightPane()
 {
-	CWnd* pWnd = m_wndSplitter.GetPane(0, 1);
+	CWnd* pWnd = m_wndSplitter2.GetPane(0, 0);
+	CStatisticListView* pView = DYNAMIC_DOWNCAST(CStatisticListView, pWnd);
+	return pView;
+}
+
+CStatisticListView* CMainFrame::GetFilterPane()
+{
+	CWnd* pWnd = m_wndSplitter2.GetPane(1, 0);
 	CStatisticListView* pView = DYNAMIC_DOWNCAST(CStatisticListView, pWnd);
 	return pView;
 }
@@ -152,114 +172,6 @@ CFunctionTreeView* CMainFrame::GetLeftPane()
 	CWnd* pWnd = m_wndSplitter.GetPane(0, 0);
 	CFunctionTreeView* pView = DYNAMIC_DOWNCAST(CFunctionTreeView, pWnd);
 	return pView;
-}
-
-void CMainFrame::OnUpdateViewStyles(CCmdUI* pCmdUI)
-{
-	if (!pCmdUI)
-		return;
-
-	// TODO: customize or extend this code to handle choices on the View menu
-
-	CStatisticListView* pView = GetRightPane(); 
-
-	// if the right-hand pane hasn't been created or isn't a view,
-	// disable commands in our range
-
-	if (pView == NULL)
-		pCmdUI->Enable(FALSE);
-	else
-	{
-		DWORD dwStyle = pView->GetStyle() & LVS_TYPEMASK;
-
-		// if the command is ID_VIEW_LINEUP, only enable command
-		// when we're in LVS_ICON or LVS_SMALLICON mode
-
-		if (pCmdUI->m_nID == ID_VIEW_LINEUP)
-		{
-			if (dwStyle == LVS_ICON || dwStyle == LVS_SMALLICON)
-				pCmdUI->Enable();
-			else
-				pCmdUI->Enable(FALSE);
-		}
-		else
-		{
-			// otherwise, use dots to reflect the style of the view
-			pCmdUI->Enable();
-			BOOL bChecked = FALSE;
-
-			switch (pCmdUI->m_nID)
-			{
-			case ID_VIEW_DETAILS:
-				bChecked = (dwStyle == LVS_REPORT);
-				break;
-
-			case ID_VIEW_SMALLICON:
-				bChecked = (dwStyle == LVS_SMALLICON);
-				break;
-
-			case ID_VIEW_LARGEICON:
-				bChecked = (dwStyle == LVS_ICON);
-				break;
-
-			case ID_VIEW_LIST:
-				bChecked = (dwStyle == LVS_LIST);
-				break;
-
-			default:
-				bChecked = FALSE;
-				break;
-			}
-
-			pCmdUI->SetRadio(bChecked ? 1 : 0);
-		}
-	}
-}
-
-
-void CMainFrame::OnViewStyle(UINT nCommandID)
-{
-	// TODO: customize or extend this code to handle choices on the View menu
-	CStatisticListView* pView = GetRightPane();
-
-	// if the right-hand pane has been created and is a CStatisticListView,
-	// process the menu commands...
-	if (pView != NULL)
-	{
-		DWORD dwStyle = -1;
-
-		switch (nCommandID)
-		{
-		case ID_VIEW_LINEUP:
-			{
-				// ask the list control to snap to grid
-				CListCtrl& refListCtrl = pView->GetListCtrl();
-				refListCtrl.Arrange(LVA_SNAPTOGRID);
-			}
-			break;
-
-		// other commands change the style on the list control
-		case ID_VIEW_DETAILS:
-			dwStyle = LVS_REPORT;
-			break;
-
-		case ID_VIEW_SMALLICON:
-			dwStyle = LVS_SMALLICON;
-			break;
-
-		case ID_VIEW_LARGEICON:
-			dwStyle = LVS_ICON;
-			break;
-
-		case ID_VIEW_LIST:
-			dwStyle = LVS_LIST;
-			break;
-		}
-
-		// change the style; window will repaint automatically
-		if (dwStyle != -1)
-			pView->ModifyStyle(LVS_TYPEMASK, dwStyle);
-	}
 }
 
 void CMainFrame::OnProjectOpenExe()
@@ -348,4 +260,9 @@ void CMainFrame::ReadSymbols(void)
 CWinProfDoc* CMainFrame::GetDocument(void)
 {
 	return GetLeftPane()->GetDocument();
+}
+
+void CMainFrame::OnProjectFilter()
+{
+	GetFilterPane()->OnProjectFilter();
 }

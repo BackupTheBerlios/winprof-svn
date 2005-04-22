@@ -12,7 +12,8 @@ public:
 	CWinProfStatistics(void) {cache.push_back(stat_cache_t());}
 	virtual ~CWinProfStatistics(void) {}
 
-	virtual CString GetString(const INVOC_INFO& call) const {ASSERT(false); return CString();} // returns the statistics value as a string
+	CString GetString(const INVOC_INFO& call) const {return ToString(GetStatValue(call));} // returns the statistics value as a string
+	virtual CString ToString(stat_val_t val) const {ASSERT(false); return CString();}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {ASSERT(false); return 0;} // sorting_by support
 	virtual CString GetStatCaption(void) const {ASSERT(false); return CString();} // returns the column name, as it appears to user in GUI
 	virtual string GetStatName(void) const = 0; // returns stat name to be used by other stats

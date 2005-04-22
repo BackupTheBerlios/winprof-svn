@@ -44,6 +44,8 @@ public:
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult);
+	void BuildFilteredList(void);
+	afx_msg void OnProjectFilter();
 };
 
 #ifndef _DEBUG  // debug version in StatisticListView.cpp

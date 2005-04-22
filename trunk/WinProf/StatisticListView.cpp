@@ -9,6 +9,7 @@
 #include "MainFrm.h"
 #include ".\statisticlistview.h"
 #include "StatisticsDialog.h"
+#include "FilterDialog.h"
 #include <utility>
 #include "StatManager.h"
 #include "WinProfStatistics.h"
@@ -29,6 +30,7 @@ BEGIN_MESSAGE_MAP(CStatisticListView, CListView)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
 	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnLvnDeleteitem)
+	ON_COMMAND(ID_PROJECT_FILTER, OnProjectFilter)
 END_MESSAGE_MAP()
 
 // CStatisticListView construction/destruction
@@ -208,4 +210,22 @@ void CStatisticListView::OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: Add your control notification handler code here
 	delete (LIST_ITEM_DATA*)pNMLV->lParam;
 	*pResult = 0;
+}
+
+void CStatisticListView::BuildFilteredList(void)
+{
+	filtered_list_t list;
+	GetListCtrl().DeleteAllItems();
+	GetDocument()->filter_manager.Filter("", static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl(), list);
+	int line = 1;
+	for (filtered_list_t::const_iterator iter = list.begin(); iter != list.end(); ++iter)
+	{
+		InsertLine(line++, *(*iter));
+	}
+}
+
+void CStatisticListView::OnProjectFilter()
+{
+	CFilterDialog dlg(GetDocument());
+	if (dlg.DoModal() == IDCANCEL) return;
 }

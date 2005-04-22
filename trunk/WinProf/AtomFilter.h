@@ -1,5 +1,6 @@
 #pragma once
 
+#include "stdafx.h"
 #include "Filter.h"
 #include "StatManager.h"
 #include "WinProfStatistics.h"

@@ -20,7 +20,7 @@ protected: // create from serialization only
 // Attributes
 public:
 protected:
-	CSplitterWnd m_wndSplitter;
+	CSplitterWnd m_wndSplitter, m_wndSplitter2;
 
 // Operations
 public:
@@ -34,6 +34,7 @@ public:
 public:
 	virtual ~CMainFrame();
 	CStatisticListView* GetRightPane();
+	CStatisticListView* GetFilterPane();
 	CFunctionTreeView* GetLeftPane();
 #ifdef _DEBUG
 	virtual void AssertValid() const;
@@ -47,8 +48,6 @@ protected:  // control bar embedded members
 // Generated message map functions
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnUpdateViewStyles(CCmdUI* pCmdUI);
-	afx_msg void OnViewStyle(UINT nCommandID);
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnProjectOpenExe();
@@ -56,6 +55,7 @@ private:
 	void ReadSymbols(void);
 public:
 	CWinProfDoc* GetDocument(void);
+	afx_msg void OnProjectFilter();
 };
 
 

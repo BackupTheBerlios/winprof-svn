@@ -151,6 +151,8 @@ void CFunctionTreeView::FillTheTree()
 	ctrl.SelectItem(root);
 	ctrl.Expand(root, TVE_EXPAND);
 	OnTvnSelchanged(NULL, NULL);
+
+	static_cast<CMainFrame*>(AfxGetMainWnd())->GetFilterPane()->BuildFilteredList();
 }
 
 // CFunctionTreeView message handlers

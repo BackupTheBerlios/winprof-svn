@@ -14,24 +14,33 @@ public:
 	~CFilterManager(void) {Destroy();}
 
 	void Destroy(void);
-	void Destroy(CString name);
+	bool Destroy(CString name);
+	void GetFilterNames(vector<CString>& containter); 
+	CFilter* GetFilter(CString name);
 	bool AddFilter(CString name, CString expr);
-	bool AddFilter(CString name, DWORD fn, int st, stat_val_t bnd, cmp_oper op);
+	bool AddFilter(CString name, bool this_f, DWORD fn, int st, stat_val_t bnd, cmp_oper op);
 	void Filter(CString name, const CTreeCtrl& ctrl, filtered_list_t& filtered_list);
+	bool EditFilter(CString nm, CString new_nm, CString expr);
+	bool EditFilter(CString nm, CString new_nm, bool this_f, DWORD fn, int st, stat_val_t bnd, cmp_oper op);
 
 //private: // functions
+	bool CanDestroy(CString name);
+	CFilter* TakeFilterAside(CString nm);
+
 	CString RemoveBlanksAtEnds(CString str);
 	bool IsOper(char c);
 	bool IsDelim(char c);
 	int FindFirstDelimFrom(CString expr, int from);
 	int Prio(char c);
-	void BuildInfixFormStack(CString expr, vector<CString>& stack);
+	void BuildInfix(CString expr, vector<CString>& stack);
 	void BuildPostfix(vector<CString>& infix, vector<CString>& postfix);
 
-
-	bool NOT(CString n1, CString n2);
-	bool AND(CString n1, CString n2);
-	bool OR(CString n1, CString n2);
+	logical_oper GetLogOpID(char op);
+	void FailedToCreate(vector<CFilter*>& stack);
+	CFilter* CreateFilterByPostfix(const vector<CString>& postfix);
+#ifdef _DEBUG_FILTER
+	void CheckConsistency(CFilter* fil) const;	
+#endif
 
 private: // data
 	static filname2fil_t filname2fil;

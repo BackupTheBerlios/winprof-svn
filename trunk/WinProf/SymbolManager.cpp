@@ -86,11 +86,16 @@ CString CSymbolManager::GetModulesPaths()
 	return path.Mid(1);
 }
 
-CString CSymbolManager::GetSymName(DWORD dwAddress)
+CString CSymbolManager::GetSymName(DWORD dwAddress) const
 {
 	symbol_map_t::const_iterator iter = symbols.find(dwAddress);
 	if (iter == symbols.end()) return CString();
 	return iter->second;
+}
+
+const CSymbolManager::symbol_map_t& CSymbolManager::GetSymbols() const
+{
+	return symbols;
 }
 
 void CSymbolManager::EnumSymbols(const list<CALL_INFO>& call_info)

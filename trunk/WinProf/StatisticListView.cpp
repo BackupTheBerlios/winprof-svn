@@ -216,7 +216,8 @@ void CStatisticListView::BuildFilteredList(void)
 {
 	filtered_list_t list;
 	GetListCtrl().DeleteAllItems();
-	GetDocument()->filter_manager.Filter("", static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl(), list);
+	GetDocument()->filter_manager.Filter(GetDocument()->m_ActiveFilter, 
+		static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl(), list);
 	int line = 1;
 	for (filtered_list_t::const_iterator iter = list.begin(); iter != list.end(); ++iter)
 	{
@@ -228,4 +229,6 @@ void CStatisticListView::OnProjectFilter()
 {
 	CFilterDialog dlg(GetDocument());
 	if (dlg.DoModal() == IDCANCEL) return;
+	GetDocument()->m_ActiveFilter = dlg.m_ActiveFilter;
+	BuildFilteredList();
 }

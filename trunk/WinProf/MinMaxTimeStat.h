@@ -19,11 +19,11 @@ public:
 		{return true;}
 	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
 		{return CmpOper::cmp_oper_vect_dw64[oper](GetStatValue(iv).dw64_val, bound.dw64_val);}
-	virtual stat_val_t GetNumerical(CString str) const
+	virtual bool GetNumerical(CString str, stat_val_t& val) const
 	{
-		stat_val_t val;
-		val.dw64_val = _atoi64(str);
-		return val;
+		if (!ValidForStat(str, IsDigit)) return false;
+		val.dw64_val = _atoi64(str) * CWinProfDoc::m_Frequency / 1000;
+		return true;
 	}
 
 protected:
@@ -57,11 +57,11 @@ public:
 		{return true;}
 	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
 		{return CmpOper::cmp_oper_vect_dw64[oper](GetStatValue(iv).dw64_val, bound.dw64_val);}
-	virtual stat_val_t GetNumerical(CString str) const
+	virtual bool GetNumerical(CString str, stat_val_t& val) const
 	{
-		stat_val_t val;
-		val.dw64_val = _atoi64(str);
-		return val;
+		if (!ValidForStat(str, IsDigit)) return false;
+		val.dw64_val = _atoi64(str) * CWinProfDoc::m_Frequency / 1000;
+		return true;
 	}
 
 protected:

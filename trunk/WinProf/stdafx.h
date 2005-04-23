@@ -44,3 +44,6 @@
 
 CString DWORD64ToStr(DWORD64 x);
 CString Format(LPCTSTR format, ...);
+bool ValidForStat(CString str,  bool(*good)(char c));
+bool IsDigit(char c);
+bool IsDigitDot(char c);

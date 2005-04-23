@@ -26,6 +26,7 @@ DWORD64 CWinProfDoc::m_Frequency = 0;
 
 CWinProfDoc::CWinProfDoc()
 : m_ExeFileName(_T(""))
+, m_ActiveFilter(_T(""))
 {
 	// TODO: add one-time construction code here
 
@@ -43,6 +44,7 @@ BOOL CWinProfDoc::OnNewDocument()
 	// TODO: add reinitialization code here
 	// (SDI documents will reuse this document)
 	m_ExeFileName.Empty();
+	m_ActiveFilter.Empty();
 	symbol_manager.Flush();
 	call_info.clear();
 	stat_manager.Clear();
@@ -71,6 +73,8 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	{
 		ar << m_ExeFileName << m_Frequency;
 		symbol_manager.Serialize(ar);
+//		filter_manager.Serialize(ar);
+//		ar << m_ActiveFilter;
 		ar << (unsigned int)call_info.size();
 		for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
 			ar.Write(&*iter, sizeof(CALL_INFO));
@@ -79,6 +83,8 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	{
 		ar >> m_ExeFileName >> m_Frequency;
 		symbol_manager.Serialize(ar);
+//		filter_manager.Serialize(ar);
+//		ar >> m_ActiveFilter;
 		unsigned int size;
 		CALL_INFO ci;
 		ar >> size;

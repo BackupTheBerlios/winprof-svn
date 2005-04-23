@@ -9,50 +9,150 @@ void CFilterManager::Destroy(void)
 {
 	filname2fil_t::iterator it = filname2fil.begin();
 	for(; it != filname2fil.end(); ++it) {
-		delete it->second;
-		filname2fil.erase(it);
+		if (! it->second->IsAtom()) {
+			delete it->second;
+			filname2fil[it->first] = NULL;
+		}
 	}
+	it = filname2fil.begin();
+	for(; it != filname2fil.end(); ++it) {
+		if (it->second != NULL)
+			delete it->second;
+	}
+	filname2fil.clear();
 }
 
-void CFilterManager::Destroy(CString name)
+bool CFilterManager::Destroy(CString name)
 {
+	if (! CanDestroy(name)) return false;
 	filname2fil_t::iterator it = filname2fil.find((const char*)name);
 	if(it != filname2fil.end()) {
 		delete it->second;
 		filname2fil.erase(it);
 	}
+	return true;
 }
+
+bool CFilterManager::CanDestroy(CString name)
+{
+	filname2fil_t::iterator it = filname2fil.begin();
+	for(; it != filname2fil.end(); ++it) {
+		if (it->first != (const char*)name && it->second->IsDependantOn(name))
+			return false;
+	}
+	return true;
+}
+
+void CFilterManager::GetFilterNames(vector<CString>& containter) 
+{
+	ASSERT(containter.empty() == true);
+	filname2fil_t::iterator it = filname2fil.begin();
+	for(; it != filname2fil.end(); ++it) {
+		containter.push_back((it->first).c_str());
+	}
+}
+
+CFilter* CFilterManager::GetFilter(CString name)
+{
+	filname2fil_t::iterator it = filname2fil.find((const char*)name);
+	if (it == filname2fil.end()) return NULL;
+	return it->second;
+}
+#ifdef _DEBUG_FILTER
+void CFilterManager::CheckConsistency(CFilter* fil) const
+{
+	CString built_expr = fil->BuildExpression();
+	CString orig_expr = fil->GetExpr();
+	CString msg;
+	msg.Format("built: %s \n orig: %s \n", built_expr, orig_expr);
+	MessageBox(NULL, msg, NULL, MB_OK);
+}
+#endif
 
 bool CFilterManager::AddFilter(CString name, CString expr)
 {
-	vector<CString> infix, postfix;
-	BuildInfixFormStack(expr, infix);
-	BuildPostfix(infix, postfix);
-	infix.clear();
-	//AddFilterByPostfix(name, postfix);
-	return false;
-}
-
-bool CFilterManager::AddFilter(CString name, DWORD fn, int st, stat_val_t bnd, cmp_oper op)
-{
+	if (! CFilter::ValidName(name)) return false;
 	filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
 	if (it != filname2fil.end()) return false;
-	filname2fil[(const char*)name] = new CAtomFilter(fn, st, bnd, op);
+
+	vector<CString> infix, postfix;
+	BuildInfix(expr, infix);
+	BuildPostfix(infix, postfix); infix.clear();
+	CFilter* fil = CreateFilterByPostfix(postfix);
+	if (fil == NULL) return false;
+	
+	fil->SetExpr(expr); 
+	fil->SetName(name);
+	filname2fil[(const char*)name] = fil;
+#ifdef _DEBUG_FILTER
+	CheckConsistency(fil);	
+#endif
 	return true;
+}
+
+CFilter* CFilterManager::TakeFilterAside(CString nm)
+{
+	filname2fil_t::iterator it = filname2fil.find((const char*)nm);	
+	if (it == filname2fil.end()) return NULL; // the filter is not found
+	CFilter* filt = it->second;
+	filname2fil.erase(it); // the filter is taken aside
+	return filt;
+}
+
+bool CFilterManager::EditFilter(CString nm, CString new_nm, CString expr)
+{
+	CFilter* filt = TakeFilterAside(nm);
+	if (AddFilter(new_nm, expr)) {
+		delete filt; // the new filter is added
+		return true;
+	} else {
+		filname2fil[(const char*)filt->GetName()] = filt; // insert it back
+		return false;
+	}
+}
+
+bool CFilterManager::AddFilter(CString name, bool this_f, DWORD fn, int st, stat_val_t bnd, cmp_oper op)
+{
+	if (! CFilter::ValidName(name)) return false;
+	filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
+	if (it != filname2fil.end()) return false;
+
+	filname2fil[(const char*)name] = new CAtomFilter(name, fn, this_f, st, bnd, op);
+	return true;
+}
+
+bool CFilterManager::EditFilter(CString nm, CString new_nm, bool this_f, DWORD fn, int st, stat_val_t bnd, cmp_oper op)
+{
+	CFilter* filt = TakeFilterAside(nm);
+	if (AddFilter(new_nm, this_f, fn, st, bnd, op)) {
+		delete filt; // the new filter is added
+		return true;
+	} else {
+		filname2fil[(const char*)filt->GetName()] = filt; // insert it back
+		return false;
+	}
 }
 
 void CFilterManager::Filter(CString name, const CTreeCtrl& ctrl, filtered_list_t& filtered_list)
 {
-	filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
-	if (it == filname2fil.end()) return;
-	CFilter* fil = it->second;
-	ASSERT(fil != NULL);
+	CFilter* fil = NULL;
+	if (name != "") {
+		filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
+		if (it == filname2fil.end()) return;
+		fil = it->second;
+	}
 
 	HTREEITEM root = ctrl.GetRootItem(), current = root;
 	do {
-		const INVOC_INFO* iv = (INVOC_INFO*)(ctrl.GetItemData(current));
-		ASSERT(iv != NULL);
-		if (fil->Satisfies(*iv)) filtered_list.push_back(iv);
+		if (current != root) {
+			const INVOC_INFO* iv = (INVOC_INFO*)(ctrl.GetItemData(current));
+			ASSERT(iv != NULL);
+			if (fil != NULL) {
+				if (fil->Satisfies(*iv)) filtered_list.push_back(iv);
+			} else {
+				filtered_list.push_back(iv);
+			}
+		}
 
 		if (ctrl.ItemHasChildren(current)) {
 			current = ctrl.GetNextItem(current, TVGN_CHILD);
@@ -66,6 +166,7 @@ void CFilterManager::Filter(CString name, const CTreeCtrl& ctrl, filtered_list_t
 		}
 	} while(current != root);
 }
+
 
 //typedef enum{LEQ=0, LES, GEQ, GRT, EQV, NEQ, CMP_OPER_COUNT} cmp_oper;
 namespace CmpOper 
@@ -114,7 +215,7 @@ int CFilterManager::FindFirstDelimFrom(CString expr, int from)
 }
 
 
-void CFilterManager::BuildInfixFormStack(CString expr, vector<CString>& stack) 
+void CFilterManager::BuildInfix(CString expr, vector<CString>& stack) 
 {
 	int cur = 0, pos;
 	CString tmp;
@@ -140,7 +241,7 @@ int CFilterManager::Prio(char c)
 		case '~': return 3;
 		case '&': return 2;
 		case '|': return 1;
-		default: return 0;
+		default: ASSERT(false); return 0;
 	}
 }
 
@@ -183,4 +284,60 @@ void CFilterManager::BuildPostfix(vector<CString>& infix, vector<CString>& postf
 	}
 }
 
-//void CFilterManager::AddFilterByPostfix(CString name, vector<CString> postfix);
+logical_oper CFilterManager::GetLogOpID(char op) {
+	switch (op) {
+		case '~': return LogicalOper::NOT;
+		case '|': return LogicalOper::OR;
+		case '&': return LogicalOper::AND;
+		default: ASSERT(false);
+	}
+	return LogicalOper::NOT;
+}
+
+void CFilterManager::FailedToCreate(vector<CFilter*>& stack)
+{
+	for (int i = 0; i < (int)stack.size(); ++i) {
+		delete stack[i];
+	}
+}
+
+CFilter* CFilterManager::CreateFilterByPostfix(const vector<CString>& postfix)
+{
+	vector<CFilter*> stack;
+	CString name;
+	CFilter *fil, *f1, *f2;
+
+	for(int i = 0; i < (int)postfix.size(); i++) {
+		name = postfix[i];
+		if(IsOper(name[0])) {
+			if ((int)stack.size() < 2) {
+				FailedToCreate(stack);
+				return NULL;
+			} else {
+				f1 = stack.back(); stack.pop_back();
+				f2 = NULL;
+				if (name[0] == '|' || name[0] == '&') {
+					f2 = stack.back(); stack.pop_back();
+					// since all operators are symmetric, we could do it an easier way
+					fil = f2->CreateNew("", "", f1, GetLogOpID(name[0]));
+				} else {
+					fil = f1->CreateNew("", "", NULL, GetLogOpID(name[0]));
+				}
+				stack.push_back(fil);
+			}
+		} else {
+			fil = GetFilter(name);
+			if (fil == NULL) {
+				FailedToCreate(stack);
+				return NULL;
+			} else {
+				stack.push_back(fil);
+			}
+		}
+	}
+	if ((int)stack.size() != 1) {
+		FailedToCreate(stack);
+		return NULL;
+	}
+	return stack.back();
+}

@@ -28,3 +28,15 @@ CString Format(LPCTSTR format, ...)
 	va_end(args);
 	return s;
 }
+
+bool ValidForStat(CString str,  bool(*good)(char c))
+{
+	int len = str.GetLength();
+	for(int i = 0; i < len; ++i) {
+		if (!good(str[i])) return false;
+	}
+	return true;
+}
+
+bool IsDigit(char c) {return ('0' <= c && c <= '9');}
+bool IsDigitDot(char c) {return (('0' <= c && c <= '9') || c == '.');}

@@ -8,6 +8,8 @@
 #include "Filter.h"
 #include "AtomFilter.h"
 #include "CompositeFilter.h"
+#include "AtomFilterDialog.h"
+#include "CompositeFilterDialog.h"
 #include "CommonDefs.h"
 #include <vector>
 
@@ -37,6 +39,14 @@ void CFilterDialog::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CFilterDialog, CDialog)
+	ON_BN_CLICKED(IDC_ATOM_ADD_BUTTON, OnBnClickedAtomAddButton)
+	ON_BN_CLICKED(IDC_ATOM_EDIT_BUTTON, OnBnClickedAtomEditButton)
+	ON_NOTIFY(NM_DBLCLK, IDC_ATOM_FILTERS_LIST, OnNMDblclkAtomFiltersList)
+	ON_BN_CLICKED(IDC_ATOM_REMOVE_BUTTON, OnBnClickedAtomRemoveButton)
+	ON_BN_CLICKED(IDC_COMPOSITE_ADD_BUTTON, OnBnClickedCompositeAddButton)
+	ON_BN_CLICKED(IDC_COMPOSITE_EDIT_BUTTON, OnBnClickedCompositeEditButton)
+	ON_BN_CLICKED(IDC_COMPOSITE_REMOVE_BUTTON, OnBnClickedCompositeRemoveButton)
+	ON_NOTIFY(NM_DBLCLK, IDC_COMPOSITE_FILTERS_LIST, OnNMDblclkCompositeFiltersList)
 END_MESSAGE_MAP()
 
 
@@ -60,6 +70,15 @@ BOOL CFilterDialog::OnInitDialog()
 	m_CompositeFiltersList.InsertColumn(0, "Name", LVCFMT_LEFT, 70, 0);
 	m_CompositeFiltersList.InsertColumn(1, "Expression", LVCFMT_LEFT, 300, 1);
 
+	FillControls();
+	return TRUE;  // return TRUE unless you set the focus to a control
+}
+
+void CFilterDialog::FillControls()
+{
+	m_FilterBy.ResetContent();
+	m_AtomFiltersList.DeleteAllItems();
+	m_CompositeFiltersList.DeleteAllItems();
 
 	m_FilterBy.AddString("");
 	vector<CString> filters;
@@ -80,7 +99,7 @@ BOOL CFilterDialog::OnInitDialog()
 			m_AtomFiltersList.SetItemText(atom_counter, 1, fn ? (it?"":"!=") + document->symbol_manager.GetSymName(fn) : "");
 			if (st!=-1)
 			{
-				m_AtomFiltersList.SetItemText(atom_counter, 2, (it?"":"!=") + document->stat_manager.GetStats()[st]->GetStatCaption());
+				m_AtomFiltersList.SetItemText(atom_counter, 2, document->stat_manager.GetStats()[st]->GetStatCaption());
 				m_AtomFiltersList.SetItemText(atom_counter, 3, CmpOper::caption[op]);
 				m_AtomFiltersList.SetItemText(atom_counter, 4, document->stat_manager.GetStats()[st]->ToString(bnd));
 			}
@@ -95,11 +114,94 @@ BOOL CFilterDialog::OnInitDialog()
 		else
 		{
 			m_CompositeFiltersList.InsertItem(composite_counter, *iter);
-			m_CompositeFiltersList.SetItemText(composite_counter, 1, static_cast<CCompositeFilter*>(f)->GetExpr());
+			m_CompositeFiltersList.SetItemText(composite_counter, 1, f->GetExpr());
 			composite_counter++;
 		}
 		m_FilterBy.AddString(*iter);
 	}
+	int x = m_FilterBy.FindStringExact(-1, document->m_ActiveFilter);
+	m_FilterBy.SetCurSel(x==CB_ERR ? 0 : x);
+}
 
-	return TRUE;  // return TRUE unless you set the focus to a control
+void CFilterDialog::OnBnClickedAtomAddButton()
+{
+	// TODO: Add your control notification handler code here
+	CAtomFilterDialog dlg(document);
+	if (dlg.DoModal() == IDCANCEL) return;
+	FillControls();
+}
+
+void CFilterDialog::OnOK()
+{
+	// TODO: Add your specialized code here and/or call the base class
+	m_FilterBy.GetLBText(m_FilterBy.GetCurSel(), m_ActiveFilter);
+	CDialog::OnOK();
+}
+
+void CFilterDialog::OnBnClickedAtomEditButton()
+{
+	// TODO: Add your control notification handler code here
+	int sel = m_AtomFiltersList.GetSelectionMark();
+	if (sel == -1) return;
+	CAtomFilterDialog dlg(document, m_AtomFiltersList.GetItemText(sel, 0));
+	if (dlg.DoModal() == IDCANCEL) return;
+	FillControls();
+}
+
+void CFilterDialog::OnNMDblclkAtomFiltersList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	OnBnClickedAtomEditButton();
+	*pResult = 0;
+}
+
+void CFilterDialog::OnBnClickedAtomRemoveButton()
+{
+	// TODO: Add your control notification handler code here
+	int sel = m_AtomFiltersList.GetSelectionMark();
+	if (sel == -1) return;
+	if (!document->filter_manager.Destroy(m_AtomFiltersList.GetItemText(sel, 0)))
+	{
+		MessageBox("Couldn't delete atom filter because other filters depend on it.", NULL, MB_ICONERROR | MB_OK);
+		return;
+	}
+	FillControls();
+}
+
+void CFilterDialog::OnBnClickedCompositeAddButton()
+{
+	// TODO: Add your control notification handler code here
+	CCompositeFilterDialog dlg(document);
+	if (dlg.DoModal() == IDCANCEL) return;
+	FillControls();
+}
+
+void CFilterDialog::OnBnClickedCompositeEditButton()
+{
+	// TODO: Add your control notification handler code here
+	int sel = m_CompositeFiltersList.GetSelectionMark();
+	if (sel == -1) return;
+	CCompositeFilterDialog dlg(document, m_CompositeFiltersList.GetItemText(sel, 0));
+	if (dlg.DoModal() == IDCANCEL) return;
+	FillControls();
+}
+
+void CFilterDialog::OnBnClickedCompositeRemoveButton()
+{
+	// TODO: Add your control notification handler code here
+	int sel = m_CompositeFiltersList.GetSelectionMark();
+	if (sel == -1) return;
+	if (!document->filter_manager.Destroy(m_CompositeFiltersList.GetItemText(sel, 0)))
+	{
+		MessageBox("Couldn't delete composite filter because other filters depend on it.", NULL, MB_ICONERROR | MB_OK);
+		return;
+	}
+	FillControls();
+}
+
+void CFilterDialog::OnNMDblclkCompositeFiltersList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: Add your control notification handler code here
+	OnBnClickedCompositeEditButton();
+	*pResult = 0;
 }

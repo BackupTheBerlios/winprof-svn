@@ -21,6 +21,7 @@ public:
 	CStatManager stat_manager;
 	CFilterManager filter_manager;
 	CString m_ExeFileName;
+	CString m_ActiveFilter;
 	std::list<CALL_INFO> call_info;
 	static DWORD64 m_Frequency;
 

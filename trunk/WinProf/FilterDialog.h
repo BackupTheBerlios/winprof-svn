@@ -23,9 +23,24 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	CWinProfDoc *document;
-public:
 	CListCtrl m_AtomFiltersList;
 	CListCtrl m_CompositeFiltersList;
-	virtual BOOL OnInitDialog();
 	CComboBox m_FilterBy;
+private:
+	void FillControls();
+public:
+	CString m_ActiveFilter;
+public:
+	virtual BOOL OnInitDialog();
+	afx_msg void OnBnClickedAtomAddButton();
+protected:
+	virtual void OnOK();
+public:
+	afx_msg void OnBnClickedAtomEditButton();
+	afx_msg void OnNMDblclkAtomFiltersList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedAtomRemoveButton();
+	afx_msg void OnBnClickedCompositeAddButton();
+	afx_msg void OnBnClickedCompositeEditButton();
+	afx_msg void OnBnClickedCompositeRemoveButton();
+	afx_msg void OnNMDblclkCompositeFiltersList(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StatManager.h"
+#include "stdafx.h"
 #include <string>
 
 using namespace std;
@@ -22,7 +23,7 @@ public:
 	virtual bool IsPerInvocation(void) const {return false;} // appears in the left pane?
 	virtual bool IsPerFunction(void) const {return false;} // appears in stat_dialog?
 	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const {ASSERT(false); return false;} // filters support
-	virtual stat_val_t GetNumerical(CString str) const {ASSERT(false); return stat_val_t();} // used when user enters a string as the atom filter bound value
+	virtual bool GetNumerical(CString str, stat_val_t& val) const {ASSERT(false); return false;} // used when user enters a string as the atom filter bound value
 	virtual bool IsCacheable() const {return false;} // does the statistic use cache?
 	
 protected:

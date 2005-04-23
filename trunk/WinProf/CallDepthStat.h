@@ -17,11 +17,11 @@ public:
 		{return true;}
 	virtual bool Satisfies(const INVOC_INFO& iv, stat_val_t bound, cmp_oper oper) const
 		{return CmpOper::cmp_oper_vect_int[oper](GetStatValue(iv).int_val, bound.int_val);}
-	virtual stat_val_t GetNumerical(CString str) const
+	virtual bool GetNumerical(CString str, stat_val_t& val) const
 	{
-		stat_val_t val;
+		if (!ValidForStat(str, IsDigit)) return false;
 		val.int_val = atoi(str);
-		return val;
+		return true;
 	}
 
 protected:

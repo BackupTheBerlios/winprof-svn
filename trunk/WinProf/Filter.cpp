@@ -3,9 +3,9 @@
 #include "AtomFilter.h"
 #include "CompositeFilter.h"
 
-CFilter* CFilter::CreateNew(CString expr, CString n, CFilter* f, logical_oper oper)
+CFilter* CFilter::CreateNew(CString expr, CString n, CString son, logical_oper oper)
 {
-	return (new CCompositeFilter(expr, n, this, f, oper));
+	return (new CCompositeFilter(expr, n/*the new name*/, name/*first son*/, son/*second son*/, oper));
 }
 
 const statistics_t& CAtomFilter::stats = CStatManager::GetStats();

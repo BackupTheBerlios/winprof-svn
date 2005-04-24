@@ -12,15 +12,20 @@ protected: // create from serialization only
 	DECLARE_DYNCREATE(CStatisticListView)
 
 // Attributes
+private:
+	filtered_list_t filtered_list;
+	int last_column;
+	int direction;
+
 public:
 	CWinProfDoc* GetDocument() const;
 
 // Operations
 public:
-
+	void Clear();
 // Overrides
-	public:
-virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+public:
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 public:
 
 // Implementation
@@ -45,7 +50,9 @@ public:
 	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult);
 	void BuildFilteredList(void);
-	afx_msg void OnProjectFilter();
+	void CStatisticListView::FinishedAddingLines();
+	void OnProjectFilter();
+	void OnProjectStatistics();
 };
 
 #ifndef _DEBUG  // debug version in StatisticListView.cpp

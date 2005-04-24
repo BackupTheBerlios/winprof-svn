@@ -102,6 +102,7 @@ void CFunctionTreeView::FillTheTree()
 	CTreeCtrl& ctrl = GetTreeCtrl(); 
 	ctrl.DeleteAllItems();
 	static_cast<CMainFrame*>(AfxGetMainWnd())->GetRightPane()->GetListCtrl().DeleteAllItems();
+	static_cast<CMainFrame*>(AfxGetMainWnd())->GetFilterPane()->Clear();
 	if (GetDocument()->call_info.empty()) return;
 
 	HTREEITEM root = ctrl.InsertItem("root", TVI_ROOT), current = root;
@@ -169,7 +170,6 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if (hItem != NULL)
 	{
-
 		if (hItem != ctrl.GetRootItem())
 			RightPane->InsertLine(++counter, *reinterpret_cast<INVOC_INFO*>(ctrl.GetItemData(hItem)));
 
@@ -184,6 +184,7 @@ void CFunctionTreeView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
 			    hChildItem = ctrl.GetNextItem(hChildItem, TVGN_NEXT);
 			}
 		}
+		RightPane->FinishedAddingLines();
 	}
 	if (pResult) *pResult = 0;
 }

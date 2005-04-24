@@ -32,6 +32,7 @@ CString Format(LPCTSTR format, ...)
 bool ValidForStat(CString str,  bool(*good)(char c))
 {
 	int len = str.GetLength();
+	if (len == 0) return false;
 	for(int i = 0; i < len; ++i) {
 		if (!good(str[i])) return false;
 	}
@@ -40,3 +41,12 @@ bool ValidForStat(CString str,  bool(*good)(char c))
 
 bool IsDigit(char c) {return ('0' <= c && c <= '9');}
 bool IsDigitDot(char c) {return (('0' <= c && c <= '9') || c == '.');}
+bool IsValidName(char c) 
+{
+	return (
+			('a' <= c && c <= 'z') || 
+			('A' <= c && c <= 'Z') || 
+			('0' <= c && c <= '9') || 
+			(c == '_')
+	);
+}

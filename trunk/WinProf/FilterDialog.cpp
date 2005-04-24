@@ -21,7 +21,7 @@ using namespace std;
 IMPLEMENT_DYNAMIC(CFilterDialog, CDialog)
 CFilterDialog::CFilterDialog(CWinProfDoc* doc, CWnd* pParent /*=NULL*/)
 	: CDialog(CFilterDialog::IDD, pParent)
-	, document(doc)
+	, document(doc), reload_count(0)
 {
 }
 
@@ -76,6 +76,9 @@ BOOL CFilterDialog::OnInitDialog()
 
 void CFilterDialog::FillControls()
 {
+	reload_count++;
+	if (reload_count > 1) document->SetModifiedFlag();
+
 	m_FilterBy.ResetContent();
 	m_AtomFiltersList.DeleteAllItems();
 	m_CompositeFiltersList.DeleteAllItems();
@@ -95,27 +98,25 @@ void CFilterDialog::FillControls()
 			stat_val_t bnd;
 			cmp_oper op;
 			static_cast<CAtomFilter*>(f)->GetAttrs(fn, it, st, bnd, op);
-			m_AtomFiltersList.InsertItem(atom_counter, *iter);
-			m_AtomFiltersList.SetItemText(atom_counter, 1, fn ? (it?"":"!=") + document->symbol_manager.GetSymName(fn) : "");
+			int index = m_AtomFiltersList.InsertItem(atom_counter++, *iter);
+			m_AtomFiltersList.SetItemText(index, 1, fn ? (it?"":"!=") + document->symbol_manager.GetSymName(fn) : "");
 			if (st!=-1)
 			{
-				m_AtomFiltersList.SetItemText(atom_counter, 2, document->stat_manager.GetStats()[st]->GetStatCaption());
-				m_AtomFiltersList.SetItemText(atom_counter, 3, CmpOper::caption[op]);
-				m_AtomFiltersList.SetItemText(atom_counter, 4, document->stat_manager.GetStats()[st]->ToString(bnd));
+				m_AtomFiltersList.SetItemText(index, 2, document->stat_manager.GetStats()[st]->GetStatCaption());
+				m_AtomFiltersList.SetItemText(index, 3, CmpOper::caption[op]);
+				m_AtomFiltersList.SetItemText(index, 4, document->stat_manager.GetStats()[st]->ToString(bnd));
 			}
 			else
 			{
-				m_AtomFiltersList.SetItemText(atom_counter, 2, "");
-				m_AtomFiltersList.SetItemText(atom_counter, 3, "");
-				m_AtomFiltersList.SetItemText(atom_counter, 4, "");
+				m_AtomFiltersList.SetItemText(index, 2, "");
+				m_AtomFiltersList.SetItemText(index, 3, "");
+				m_AtomFiltersList.SetItemText(index, 4, "");
 			}
-			atom_counter++;
 		}
 		else
 		{
-			m_CompositeFiltersList.InsertItem(composite_counter, *iter);
-			m_CompositeFiltersList.SetItemText(composite_counter, 1, f->GetExpr());
-			composite_counter++;
+			int index = m_CompositeFiltersList.InsertItem(composite_counter++, *iter);
+			m_CompositeFiltersList.SetItemText(index, 1, f->GetExpr());
 		}
 		m_FilterBy.AddString(*iter);
 	}

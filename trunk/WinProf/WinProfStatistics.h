@@ -14,6 +14,7 @@ public:
 	virtual ~CWinProfStatistics(void) {}
 
 	CString GetString(const INVOC_INFO& call) const {return ToString(GetStatValue(call));} // returns the statistics value as a string
+	CString GetString(const filtered_list_t& list) const {return ToString(CalculateStatVal(list));}
 	virtual CString ToString(stat_val_t val) const {ASSERT(false); return CString();}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const {ASSERT(false); return 0;} // sorting_by support
 	virtual CString GetStatCaption(void) const {ASSERT(false); return CString();} // returns the column name, as it appears to user in GUI
@@ -29,6 +30,8 @@ public:
 protected:
 	// calculate stat value
 	virtual stat_val_t CalculateStatVal(const calls_vector_t& v, const INVOC_INFO& call) const = 0;
+public:
+	virtual stat_val_t CalculateStatVal(const filtered_list_t& list) const {ASSERT(false); return stat_val_t();}
 
 public:
 	stat_val_t GetStatValue(const INVOC_INFO& call) const
@@ -42,7 +45,8 @@ public:
 		return value;
 	}
 
-	void ClearCache(void) const {cache[id].clear();}
+	static void ClearCache(void)
+		{for (cache_t::iterator i = cache.begin(); i != cache.end(); ++i) i->clear();}
 	void SetId(int id) const {this->id = id;}
 	// if true is returned, then val is properly updated
 	bool SearchCache(const INVOC_INFO& call, stat_val_t& val) const
@@ -64,8 +68,15 @@ protected:
 	static const func2vect_t& func2vect;
 	static const statistics_t& stats;
 
+	static const FUNC_CALL_STAT& GetFuncCallStat(const INVOC_INFO& call)
+	{
+		func2vect_t::const_iterator i = func2vect.find(call.address);
+		ASSERT(i != func2vect.end());
+		ASSERT(call.invocation <= (int)i->second.size());
+		return i->second[call.invocation-1];
+	}
+
 private:
-	// clears the cache if at all
 	void AddToCache(const INVOC_INFO& call, stat_val_t value) const {cache[id][call] = value;}
 
 private:

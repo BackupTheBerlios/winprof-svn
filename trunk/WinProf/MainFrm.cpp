@@ -26,6 +26,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_COMMAND(ID_PROJECT_OPENEXE, OnProjectOpenExe)
 	ON_COMMAND(ID_PROJECT_FILTER, OnProjectFilter)
+	ON_COMMAND(ID_PROJECT_STATISTICS, OnProjectStatistics)
 END_MESSAGE_MAP()
 
 static UINT indicators[] =
@@ -188,7 +189,7 @@ void CMainFrame::OnProjectOpenExe()
 	si.cb = sizeof(si);
 	if (!CreateProcess(filename, NULL, NULL, NULL, FALSE, 0, NULL, NULL, &si, &info))
 	{
-		MessageBox("can't create process");
+		MessageBox("Couldn't create process.", NULL, MB_ICONERROR | MB_OK);
 		return;
 	}
 
@@ -201,7 +202,12 @@ void CMainFrame::OnProjectOpenExe()
 	GetTempPath(MAX_PATH, temp);
 	CString calllog_filename;
 	calllog_filename.Format(_T("%scalllog.%d"), temp, info.dwProcessId);
-	GetDocument()->ReadCallLog(calllog_filename);
+	if (!GetDocument()->ReadCallLog(calllog_filename))
+	{
+		MessageBox("Couldn't read functions call log file.\n"
+			"Make sure the application is linked against CallMon.lib", NULL, MB_ICONERROR | MB_OK);
+		return;
+	}
 	CFile::Remove(calllog_filename);
 	LARGE_INTEGER freq;
 	QueryPerformanceFrequency(&freq);
@@ -221,7 +227,7 @@ void CMainFrame::ReadSymbols(void)
 	si.cb = sizeof(si);
 	if (!CreateProcess(GetDocument()->m_ExeFileName, NULL, NULL, NULL, FALSE, DEBUG_PROCESS|DEBUG_ONLY_THIS_PROCESS, NULL, NULL, &si, &info))
 	{
-		MessageBox("can't create process");
+		MessageBox("Couldn't create process.", NULL, MB_ICONERROR | MB_OK);
 		return;
 	}
 	BOOL stop = FALSE;
@@ -265,4 +271,9 @@ CWinProfDoc* CMainFrame::GetDocument(void)
 void CMainFrame::OnProjectFilter()
 {
 	GetFilterPane()->OnProjectFilter();
+}
+
+void CMainFrame::OnProjectStatistics()
+{
+	GetFilterPane()->OnProjectStatistics();
 }

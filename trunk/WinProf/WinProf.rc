@@ -88,6 +88,7 @@ BEGIN
     BUTTON      ID_PROJECT_OPENEXE
     SEPARATOR
     BUTTON      ID_PROJECT_FILTER
+    BUTTON      ID_PROJECT_STATISTICS
     SEPARATOR
     BUTTON      ID_APP_ABOUT
 END
@@ -116,11 +117,12 @@ BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
     END
-    POPUP "&Project"
+    POPUP "&Profile"
     BEGIN
-        MENUITEM "Open &EXE...\tCtrl+E",        ID_PROJECT_OPENEXE
+        MENUITEM "Open &Program...\tCtrl+P",    ID_PROJECT_OPENEXE
         MENUITEM SEPARATOR
         MENUITEM "&Filter...\tCtrl+F",          ID_PROJECT_FILTER
+        MENUITEM "S&tatistics...\tCtrl+T",      ID_PROJECT_STATISTICS
     END
     POPUP "&Help"
     BEGIN
@@ -149,8 +151,9 @@ BEGIN
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
-    "E",            ID_PROJECT_OPENEXE,     VIRTKEY, CONTROL, NOINVERT
     "F",            ID_PROJECT_FILTER,      VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_PROJECT_OPENEXE,     VIRTKEY, CONTROL, NOINVERT
+    "T",            ID_PROJECT_STATISTICS,  VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -159,17 +162,19 @@ END
 // Dialog
 //
 
-IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 79
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "About WinProf++"
 FONT 8, "MS Shell Dlg", 0, 0, 0x1
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,21,20
     LTEXT           "WinProf++ Version 1.0",IDC_STATIC,40,10,119,8,
                     SS_NOPREFIX
     LTEXT           "Copyright (C) 2005",IDC_STATIC,40,25,119,8
     DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+    LTEXT           "Alexander Landau (landau@cs.technioin.ac.il)\nAlexey Doctorovich (sdoc@t2.technion.ac.il)\nMichael Serebro (skritino@t2.technion.ac.il)",
+                    IDC_STATIC,40,39,171,26
 END
 
 IDD_WAIT_TERMINATION_DIALOG DIALOGEX 0, 0, 140, 26
@@ -310,7 +315,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 228
         TOPMARGIN, 7
-        BOTTOMMARGIN, 48
+        BOTTOMMARGIN, 72
     END
 
     IDD_WAIT_TERMINATION_DIALOG, DIALOG
@@ -494,8 +499,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    ID_PROJECT_OPENEXE      "Open program for profiling"
-    ID_PROJECT_FILTER       "Specify functions to display"
+    ID_PROJECT_OPENEXE      "Open program for profiling\nOpen Program"
+    ID_PROJECT_FILTER       "Specify functions to display\nFilter"
+    ID_PROJECT_STATISTICS   "Display statistics for for filtered functions\nStatistics"
 END
 
 #endif    // English (U.S.) resources

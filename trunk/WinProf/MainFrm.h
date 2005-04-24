@@ -56,6 +56,7 @@ private:
 public:
 	CWinProfDoc* GetDocument(void);
 	afx_msg void OnProjectFilter();
+	afx_msg void OnProjectStatistics();
 };
 
 

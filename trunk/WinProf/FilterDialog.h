@@ -22,6 +22,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 private:
+	int reload_count;
 	CWinProfDoc *document;
 	CListCtrl m_AtomFiltersList;
 	CListCtrl m_CompositeFiltersList;

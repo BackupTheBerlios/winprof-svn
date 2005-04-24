@@ -9,8 +9,6 @@ class CAvgTimeStat : public CWinProfStatistics
 public:
 	virtual CString ToString(stat_val_t val) const 
 		{return DWORD64ToStr(val.dw64_val*1000/CWinProfDoc::m_Frequency);}
-	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
-		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
 	virtual CString GetStatCaption(void) const 
 		{return "Avg Run Time (ms)";}
 	virtual string GetStatName() const
@@ -33,7 +31,22 @@ protected:
 		DWORD64 time = stats[CStatManager::GetStName2Index()["TotalTimeStat"]]->GetStatValue(call).dw64_val;
 		int calls = stats[CStatManager::GetStName2Index()["CountCallsStat"]]->GetStatValue(call).int_val;
 		stat_val_t val;
-		val.dw64_val = time/calls;
+		if (calls)
+			val.dw64_val = time/calls;
+		else
+			val.dw64_val = 0;
+		return val;
+	}
+
+	virtual stat_val_t CalculateStatVal(const filtered_list_t& list) const
+	{
+		DWORD64 time = stats[CStatManager::GetStName2Index()["TotalTimeStat"]]->CalculateStatVal(list).dw64_val;
+		int calls = stats[CStatManager::GetStName2Index()["CountCallsStat"]]->CalculateStatVal(list).int_val;
+		stat_val_t val;
+		if (calls)
+			val.dw64_val = time/calls;
+		else
+			val.dw64_val = 0;
 		return val;
 	}
 }; // class CAvgTimeStat 
@@ -69,6 +82,19 @@ protected:
 		if (calls == 0) return val;
 		DWORD64 avg = stats[CStatManager::GetStName2Index()["AvgTimeStat"]]->GetStatValue(call).dw64_val;
 		double squared = stats[CStatManager::GetStName2Index()["TotalSquaredTimeStat"]]->GetStatValue(call).double_val;
+		double variance = squared/calls - (double)avg*avg;
+		val.dw64_val = (DWORD64)(sqrt(variance) / CWinProfDoc::m_Frequency * 1000);
+		return val;
+	}
+
+	virtual stat_val_t CalculateStatVal(const filtered_list_t& list) const
+	{
+		stat_val_t val;
+		val.dw64_val = 0;
+		int calls = stats[CStatManager::GetStName2Index()["CountCallsStat"]]->CalculateStatVal(list).int_val;
+		if (calls == 0) return val;
+		DWORD64 avg = stats[CStatManager::GetStName2Index()["AvgTimeStat"]]->CalculateStatVal(list).dw64_val;
+		double squared = stats[CStatManager::GetStName2Index()["TotalSquaredTimeStat"]]->CalculateStatVal(list).double_val;
 		double variance = squared/calls - (double)avg*avg;
 		val.dw64_val = (DWORD64)(sqrt(variance) / CWinProfDoc::m_Frequency * 1000);
 		return val;

@@ -44,8 +44,7 @@ void CStatManager::AddStatClass(const CWinProfStatistics* stat)
 void CStatManager::Clear(void)
 {
 	func2vect.clear();
-	for (statistics_t::const_iterator iter = stats.begin(); iter != stats.end(); ++iter)
-		(*iter)->ClearCache();
+	CWinProfStatistics::ClearCache();
 }
 
 INT CStatManager::UpdateStatsWith(const INVOC_INFO& call)

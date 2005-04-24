@@ -48,6 +48,7 @@ BOOL CWinProfDoc::OnNewDocument()
 	symbol_manager.Flush();
 	call_info.clear();
 	stat_manager.Clear();
+	filter_manager.Destroy();
 
 	return TRUE;
 }
@@ -73,8 +74,8 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	{
 		ar << m_ExeFileName << m_Frequency;
 		symbol_manager.Serialize(ar);
-//		filter_manager.Serialize(ar);
-//		ar << m_ActiveFilter;
+		filter_manager.Serialize(ar);
+		ar << m_ActiveFilter;
 		ar << (unsigned int)call_info.size();
 		for (list<CALL_INFO>::const_iterator iter = call_info.begin(); iter != call_info.end(); ++iter)
 			ar.Write(&*iter, sizeof(CALL_INFO));
@@ -83,8 +84,8 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	{
 		ar >> m_ExeFileName >> m_Frequency;
 		symbol_manager.Serialize(ar);
-//		filter_manager.Serialize(ar);
-//		ar >> m_ActiveFilter;
+		filter_manager.Serialize(ar);
+		ar >> m_ActiveFilter;
 		unsigned int size;
 		CALL_INFO ci;
 		ar >> size;
@@ -97,13 +98,16 @@ void CWinProfDoc::Serialize(CArchive& ar)
 	}
 }
 
-void CWinProfDoc::ReadCallLog(CString filename)
+BOOL CWinProfDoc::ReadCallLog(CString filename)
 {
 	call_info.clear();
-	CFile f(filename, CFile::modeRead);
+	CFile f;
+	if (!f.Open(filename, CFile::modeRead))
+		return FALSE;
 	CALL_INFO ci;
 	while (f.Read(&ci, sizeof(CALL_INFO)))
 		call_info.push_back(ci);
+	return TRUE;
 }
 
 

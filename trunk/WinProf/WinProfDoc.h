@@ -27,7 +27,7 @@ public:
 
 // Operations
 public:
-	void ReadCallLog(CString filename);
+	BOOL ReadCallLog(CString filename);
 
 // Overrides
 	public:

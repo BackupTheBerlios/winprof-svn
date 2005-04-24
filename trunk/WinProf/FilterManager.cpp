@@ -9,15 +9,11 @@ void CFilterManager::Destroy(void)
 {
 	filname2fil_t::iterator it = filname2fil.begin();
 	for(; it != filname2fil.end(); ++it) {
-		if (! it->second->IsAtom()) {
-			delete it->second;
-			it->second = NULL;
-		}
-	}
-	it = filname2fil.begin();
-	for(; it != filname2fil.end(); ++it) {
-		if (it->second != NULL)
-			delete it->second;
+CFilter* filt = it->second;
+CString str;
+str.Format("%lu filter named %s to be deleted, Destroy(void)\n", (void*)filt, filt->GetName());
+OutputDebugString(str);
+		delete it->second;
 	}
 	filname2fil.clear();
 }
@@ -27,6 +23,10 @@ bool CFilterManager::Destroy(CString name)
 	if (! CanDestroy(name)) return false;
 	filname2fil_t::iterator it = filname2fil.find((const char*)name);
 	if(it != filname2fil.end()) {
+CFilter* filt = it->second;
+CString str;
+str.Format("%lu filter named %s to be deleted, Destroy(name)\n", (void*)filt, filt->GetName());
+OutputDebugString(str);
 		delete it->second;
 		filname2fil.erase(it);
 	}
@@ -43,24 +43,13 @@ bool CFilterManager::CanDestroy(CString name)
 	return true;
 }
 
-void CFilterManager::UpdateAllDependant(CFilter* oldf, CFilter* newf)
-{
-	filname2fil_t::iterator it = filname2fil.begin();
-	for(; it != filname2fil.end(); ++it) {
-		OutputDebugString("from inside UpdateAllDependant\n");
-		CString msg;
-		msg.Format("filter: %s from UpdateAllDependant\n", it->second->GetName());
-		OutputDebugString(msg);
-		it->second->UpdateTree(oldf, newf);
-	}
-}
-
 void CFilterManager::GetFilterNames(vector<CString>& containter) 
 {
 	ASSERT(containter.empty() == true);
 	filname2fil_t::iterator it = filname2fil.begin();
 	for(; it != filname2fil.end(); ++it) {
-		containter.push_back((it->first).c_str());
+		if(it->first[0] != '$')
+			containter.push_back((it->first).c_str());
 	}
 }
 
@@ -70,6 +59,7 @@ CFilter* CFilterManager::GetFilter(CString name)
 	if (it == filname2fil.end()) return NULL;
 	return it->second;
 }
+
 #ifdef _DEBUG_FILTER
 void CFilterManager::CheckConsistency(CFilter* fil) const
 {
@@ -83,7 +73,7 @@ void CFilterManager::CheckConsistency(CFilter* fil) const
 
 bool CFilterManager::AddFilter(CString name, CString expr)
 {
-	if (! CFilter::ValidName(name)) return false;
+	if (!ValidForStat(name, IsValidName)) return false;
 	filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
 	if (it != filname2fil.end()) return false;
 
@@ -91,14 +81,17 @@ bool CFilterManager::AddFilter(CString name, CString expr)
 	BuildInfix(expr, infix);
 	BuildPostfix(infix, postfix); infix.clear();
 	CFilter* fil = CreateFilterByPostfix(name, postfix);
+
 	if (fil == NULL) return false;
-	
+	CString msg;
+	msg.Format("update expr with %s for %s\n", expr, fil->GetName());
+	OutputDebugString(msg);
 	fil->SetExpr(expr); 
-	fil->SetName(name);
-	filname2fil[(const char*)name] = fil;
+
 #ifdef _DEBUG_FILTER
 	CheckConsistency(fil);	
 #endif
+
 	return true;
 }
 
@@ -117,15 +110,9 @@ bool CFilterManager::EditFilter(CString nm, CString new_nm, CString expr)
 	CFilter* filt = TakeFilterAside(nm);
 	if (filt == NULL) return false;
 	if (AddFilter(new_nm, expr)) {
-		// dependancies are by pointers, so the pointers must be replaced if needed
-		// if the name is changed, then no dependancies detected
-		// it is important to do it before the deletion ??? not at all (for safety is done so)
-		if (nm == new_nm) {
-			CString msg;
-			msg.Format("editing composite filter %s, update from %lu to %lu\n", nm, filt, GetFilter(new_nm));
-			OutputDebugString(msg);
-			UpdateAllDependant(filt, GetFilter(new_nm));
-		}
+CString str;
+str.Format("%lu filter named %s to be deleted, EditCompFilter\n", (void*)filt, filt->GetName());
+OutputDebugString(str);
 		delete filt; // the new filter is added
 		return true;
 	} else {
@@ -136,7 +123,7 @@ bool CFilterManager::EditFilter(CString nm, CString new_nm, CString expr)
 
 bool CFilterManager::AddFilter(CString name, bool this_f, DWORD fn, int st, stat_val_t bnd, cmp_oper op)
 {
-	if (! CFilter::ValidName(name)) return false;
+	if (!ValidForStat(name, IsValidName)) return false;
 	filname2fil_t::const_iterator it = filname2fil.find((const char*)name);
 	if (it != filname2fil.end()) return false;
 
@@ -150,15 +137,9 @@ bool CFilterManager::EditFilter(CString nm, CString new_nm, bool this_f, DWORD f
 	CFilter* filt = TakeFilterAside(nm);
 	if (filt == NULL) return false;
 	if (AddFilter(new_nm, this_f, fn, st, bnd, op)) {
-		// dependancies are by pointers, so the pointers must be replaced if needed
-		// if the name is changed, then no dependancies detected
-		// it is important to do it before the deletion ??? not at all (for safety is done so)
-		if (nm == new_nm) {
-			CString msg;
-			msg.Format("editing atom filter %s, update from %lu to %lu\n", nm, filt, GetFilter(new_nm));
-			OutputDebugString(msg);
-			UpdateAllDependant(filt, GetFilter(new_nm));
-		}
+CString str;
+str.Format("%lu filter named %s to be deleted, EditAtomFilter\n", (void*)filt, filt->GetName());
+OutputDebugString(str);
 		delete filt; // the new filter is added
 		return true;
 	} else {
@@ -339,47 +320,50 @@ logical_oper CFilterManager::GetLogOpID(char op) {
 	return LogicalOper::NOT;
 }
 
-void CFilterManager::FailedToCreate(vector<CFilter*>& stack)
+void CFilterManager::FailedToCreate(vector<CString>& stack)
 {
-	for (int i = 0; i < (int)stack.size(); ++i) {
+	// with the new implementation we have already placed them in the stack
+/*	for (int i = 0; i < (int)stack.size(); ++i) {
 		delete stack[i];
-	}
+	} */ 
 }
 
 CFilter* CFilterManager::CreateFilterByPostfix(CString new_filter, const vector<CString>& postfix)
 {
-	vector<CFilter*> stack;
-	CString name;
-	CFilter *fil, *f1, *f2;
+	vector<CString> stack;
+	CString token, fil, f1, f2;
+	CFilter* fil_ptr;
 	bool flag = false;
 
 	for(int i = 0; i < (int)postfix.size(); i++) {
-		name = postfix[i];
-		if(IsOper(name[0])) {
-			if ((int)stack.size() < 2) {
-				FailedToCreate(stack);
+		token = postfix[i];
+		if(IsOper(token[0])) {
+			if ((int)stack.size() < 1) {
+				FailedToCreate(stack); 
 				return NULL;
 			} else {
 				f1 = stack.back(); stack.pop_back();
-				f2 = NULL;
-				if (name[0] == '|' || name[0] == '&') {
+				f2 = "";
+				if (token[0] == '|' || token[0] == '&') {
 					f2 = stack.back(); stack.pop_back();
 					// since all operators are symmetric, we could do it an easier way
-					fil = f2->CreateNew("", "", f1, GetLogOpID(name[0]));
+					fil_ptr = GetFilter(f2)->CreateNew("", CFilter::GetTmpName(), f1, GetLogOpID(token[0]));
 				} else {
-					fil = f1->CreateNew("", "", NULL, GetLogOpID(name[0]));
+					fil_ptr = GetFilter(f1)->CreateNew("", CFilter::GetTmpName(), "", GetLogOpID(token[0]));
 				}
 				flag = true;
-				stack.push_back(fil);
+				ASSERT(GetFilter((const char*)fil_ptr->GetName()) == NULL);
+				filname2fil[(const char*)fil_ptr->GetName()] = fil_ptr;
+				stack.push_back(fil_ptr->GetName()); // the temporary name given
 			}
 		} else {
-			fil = GetFilter(name);
-			if (fil == NULL || fil->IsDependantOn(new_filter)) {
+			fil_ptr = GetFilter(token);
+			if (fil_ptr == NULL || fil_ptr->IsDependantOn(new_filter)) {
 				FailedToCreate(stack);
 				return NULL;
 			}
 			else {
-				stack.push_back(fil);
+				stack.push_back(token);
 			}
 		}
 	}
@@ -388,6 +372,116 @@ CFilter* CFilterManager::CreateFilterByPostfix(CString new_filter, const vector<
 		return NULL;
 	}
 	fil = stack.back();
-	if (!flag) fil = fil->CreateNew("", "", fil, LogicalOper::AND);
-	return fil;
+	fil_ptr = GetFilter(fil);
+	if (!flag) {
+		// create the filter
+		fil_ptr = fil_ptr->CreateNew("", CFilter::GetTmpName(), fil, LogicalOper::AND);
+	} else {
+		// erase the entry with tmp_name(the last one)
+		filname2fil_t::iterator it = filname2fil.find((const char*)fil_ptr->GetName());
+		ASSERT(it != filname2fil.end());
+		filname2fil.erase(it);
+	}
+
+	filname2fil[(const char*)new_filter] = fil_ptr;
+	fil_ptr->SetName(new_filter);
+
+	return fil_ptr; // the name and the expression to be updated later
+}
+
+bool CFilterManager::IndependantOn(const vector<CString>& stack, CFilter* filt)
+{
+	vector<CString>::const_iterator it = stack.begin();
+	for(; it != stack.end(); ++it) 
+		if(*it != filt->GetName() && filt->IsDependantOn(*it)) return false;
+	return true;
+}
+
+void CFilterManager::Linearize(vector<CString>& stack)
+{
+	ASSERT(stack.empty() == true);
+
+	vector<CString> stack1, stack2;
+	GetFilterNames(stack1);
+
+	vector<CString>* current = &stack1; // contains all names remained to insert to stack
+	vector<CString>* remained = &stack2; // contains reminders after each loop
+
+	bool changed = false; // if when we detect that current is not changed after a pass - then we cannot linearize
+	
+	while(! current->empty()) {
+		changed = false;
+		vector<CString>::iterator it = current->begin();
+		for(; it != current->end(); ++it) {
+			if(IndependantOn(*current, GetFilter(*it)) && IndependantOn(*remained, GetFilter(*it))) {
+				stack.push_back(*it);
+				changed = true;
+			} else {
+				remained->push_back(*it);
+			}
+		}
+		ASSERT(changed);
+		// swap remaned and current
+		current->clear();
+		vector<CString>* tmp = current;
+		current = remained;
+		remained = tmp;
+	}
+}
+
+void CFilterManager::Serialize(CArchive& ar)
+{
+	vector<CString> stack;
+	if (ar.IsStoring())
+	{
+		Linearize(stack);
+		ar << (unsigned int)stack.size();
+		CFilter* filt;
+
+		vector<CString>::const_iterator it = stack.begin();
+		for(; it != stack.end(); ++it) {
+			filt = GetFilter(*it);
+			ASSERT(filt != NULL);
+			if (filt->IsAtom()) {
+				DWORD fn;
+				bool this_func;
+				int st;
+				stat_val_t bnd;
+				cmp_oper op; 
+				static_cast<CAtomFilter*>(filt)->GetAttrs(fn, this_func,st, bnd, op);
+				ar << char('a') << filt->GetName() << fn << this_func << st;
+				ar.Write(&bnd, sizeof(stat_val_t));
+				ar << (int)op;
+			} else {
+				ar << char('c') << filt->GetName() << filt->GetExpr();
+			}
+		}
+	}
+	else
+	{
+		Destroy(); // clears the map
+		unsigned int size;
+		char atom;
+		ar >> size;
+		while (size--)
+		{
+			ar >> atom;
+			if (atom == 'a') {
+				CString name;
+				DWORD fn;
+				bool this_func;
+				int st;
+				stat_val_t bnd;
+				int op; 
+				ar >> name >> fn >> this_func >> st;
+				ar.Read(&bnd, sizeof(stat_val_t));
+				ar >> op;
+				ASSERT(AddFilter(name, this_func, fn, st, bnd, (cmp_oper)op) == true);
+			} else { // atom == 'c'
+				CString name, expr;
+				ar >> name >> expr;
+				ASSERT(AddFilter(name, expr) == true);
+			}
+		}
+	}
 }

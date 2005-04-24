@@ -30,12 +30,12 @@ BEGIN_MESSAGE_MAP(CStatisticListView, CListView)
 	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblclk)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnclick)
 	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnLvnDeleteitem)
-	ON_COMMAND(ID_PROJECT_FILTER, OnProjectFilter)
 END_MESSAGE_MAP()
 
 // CStatisticListView construction/destruction
 
 CStatisticListView::CStatisticListView()
+	: last_column(0), direction(0)
 {
 	// TODO: add construction code here
 }
@@ -155,7 +155,7 @@ void CStatisticListView::OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult)
 	if (item == -1) return;
 	CListCtrl& ctrl = GetListCtrl();
 	LIST_ITEM_DATA* data = (LIST_ITEM_DATA*)ctrl.GetItemData(item);
-	CStatisticsDialog dlg(GetDocument()->stat_manager, GetDocument()->symbol_manager, data->invoc_info.address);
+	CStatisticsDialog dlg(GetDocument(), data->invoc_info.address);
 	dlg.DoModal();
 }
 
@@ -165,7 +165,7 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	int direction = ((int)lParamSort >> 8) & 0xFF;
 	LIST_ITEM_DATA *d1, *d2;
 	CSymbolManager* man = LIST_ITEM_DATA::man;
-	CStatManager* stats = LIST_ITEM_DATA::stats;
+	statistics_t& stats = LIST_ITEM_DATA::stats->GetStats();
 	if (direction) {
 		d1 = (LIST_ITEM_DATA*)lParam2;
 		d2 = (LIST_ITEM_DATA*)lParam1;
@@ -180,28 +180,42 @@ int CALLBACK CompareFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	case 1:		// Function Name
 		return man->GetSymName(d1->invoc_info.address).Compare(man->GetSymName(d2->invoc_info.address));
 	default:	// A statistic
-		return stats->GetStats()[column-2]->StatCompare(d1->invoc_info, d2->invoc_info);
+		int id;
+		column -= 2;
+		for(id = 0; id < (int)stats.size(); id++) 
+			if (stats[id]->IsPerInvocation())
+			{
+				if (column == 0) break;
+				column--;
+			}
+		return stats[id]->StatCompare(d1->invoc_info, d2->invoc_info);
 	}
 	return 0; 
 } 
 
 void CStatisticListView::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	*pResult = 0;
+	if (pResult) *pResult = 0;
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: Add your control notification handler code here
-	static int last_column = 0;
-	static int direction = 0;
-	if (last_column == pNMLV->iSubItem)
+	if (pNMLV)
 	{
-		direction = ! direction;
-	}
-	else
-	{
-		direction = 0;
-		last_column = pNMLV->iSubItem;
+		if (last_column == pNMLV->iSubItem)
+		{
+			direction = ! direction;
+		}
+		else
+		{
+			direction = 0;
+			last_column = pNMLV->iSubItem;
+		}
 	}
 	GetListCtrl().SortItems(CompareFunc, (direction<<8) + last_column);
+}
+
+void CStatisticListView::FinishedAddingLines()
+{
+	OnLvnColumnclick(NULL, NULL);
 }
 
 void CStatisticListView::OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
@@ -214,15 +228,16 @@ void CStatisticListView::OnLvnDeleteitem(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CStatisticListView::BuildFilteredList(void)
 {
-	filtered_list_t list;
+	filtered_list.clear();
 	GetListCtrl().DeleteAllItems();
 	GetDocument()->filter_manager.Filter(GetDocument()->m_ActiveFilter, 
-		static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl(), list);
+		static_cast<CMainFrame*>(AfxGetMainWnd())->GetLeftPane()->GetTreeCtrl(), filtered_list);
 	int line = 1;
-	for (filtered_list_t::const_iterator iter = list.begin(); iter != list.end(); ++iter)
+	for (filtered_list_t::const_iterator iter = filtered_list.begin(); iter != filtered_list.end(); ++iter)
 	{
 		InsertLine(line++, *(*iter));
 	}
+	FinishedAddingLines();
 }
 
 void CStatisticListView::OnProjectFilter()
@@ -230,5 +245,21 @@ void CStatisticListView::OnProjectFilter()
 	CFilterDialog dlg(GetDocument());
 	if (dlg.DoModal() == IDCANCEL) return;
 	GetDocument()->m_ActiveFilter = dlg.m_ActiveFilter;
+	GetDocument()->SetModifiedFlag();
 	BuildFilteredList();
+}
+
+void CStatisticListView::OnProjectStatistics()
+{
+	if (filtered_list.size() != 0)
+	{
+		CStatisticsDialog dlg(GetDocument(), filtered_list);
+		dlg.DoModal();
+	}
+}
+
+void CStatisticListView::Clear()
+{
+	GetListCtrl().DeleteAllItems();
+	filtered_list.clear();
 }

@@ -25,6 +25,7 @@ public:
 
 //private: // functions
 	bool CanDestroy(CString name);
+	void UpdateAllDependant(CFilter* oldf, CFilter* newf);
 	CFilter* TakeFilterAside(CString nm);
 
 	CString RemoveBlanksAtEnds(CString str);
@@ -37,7 +38,7 @@ public:
 
 	logical_oper GetLogOpID(char op);
 	void FailedToCreate(vector<CFilter*>& stack);
-	CFilter* CreateFilterByPostfix(const vector<CString>& postfix);
+	CFilter* CreateFilterByPostfix(CString new_filter, const vector<CString>& postfix);
 #ifdef _DEBUG_FILTER
 	void CheckConsistency(CFilter* fil) const;	
 #endif

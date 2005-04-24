@@ -5,7 +5,7 @@
 class CCompositeFilter : public CFilter
 {
 public:
-	CCompositeFilter(CString ex, CString nm, const CFilter* v1, const CFilter* v2, logical_oper op)
+	CCompositeFilter(CString ex, CString nm, CFilter* v1, CFilter* v2, logical_oper op)
 		: CFilter(nm)
 		, f1(v1)
 		, f2(v2)
@@ -18,7 +18,7 @@ public:
 	{
 		ASSERT(f1 != NULL);
 		if (f1->GetExpr() == "") delete f1;
-		if (f2 != NULL) {
+		if (f2 != NULL && f2 != f1) {
 			if (f2->GetExpr() == "") delete f2;
 		}
 	}
@@ -33,6 +33,27 @@ public:
 		{return expr;}
 	virtual SetExpr(CString e) 
 		{expr = e;}
+
+	virtual void UpdateTree(CFilter* oldf, CFilter* newf) 
+	{
+		OutputDebugString((const char*)GetName());
+		OutputDebugString("composite update is called\n");
+		ASSERT(f1 != NULL);
+		ChangeOrUpdate(f1, oldf, newf);
+		if (f2 != NULL) 
+			ChangeOrUpdate(f2, oldf, newf);
+	}
+
+	static void ChangeOrUpdate(CFilter*& orig, CFilter* oldf, CFilter* newf) 
+	{
+		if(orig == oldf) {
+			orig = newf;
+		} else {
+			OutputDebugString((const char*)orig->GetName());
+			OutputDebugString("ready to call\n");
+			orig->UpdateTree(oldf, newf);
+		}		
+	}
 
 	// make use of a filter
 	virtual bool Satisfies(const INVOC_INFO& iv) const
@@ -67,14 +88,12 @@ public:
 public:
 	virtual bool DoesContain(CString n) const
 	{
-		bool dep = f1->DoesContain(n);
-		if (f2 != NULL) dep = (dep || f2->DoesContain(n));
-		return dep;
+		return name == n || f1->DoesContain(n) || (f2 != NULL && f2->DoesContain(n));
 	}
 
 private:
-	const CFilter* f1;
-	const CFilter* f2;
+	CFilter* f1;
+	CFilter* f2;
 	logical_oper oper;
 	CString expr;
 };

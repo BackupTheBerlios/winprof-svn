@@ -9,7 +9,7 @@ public:
 	virtual ~CFilter(void) {}
 
 	// creation of new object, dynamic allocation used
-	CFilter* CreateNew(CString expr, CString n, const CFilter* f, logical_oper oper);
+	CFilter* CreateNew(CString expr, CString n, CFilter* f, logical_oper oper);
 	virtual bool IsDependantOn(CString n) const = 0;
 	virtual bool IsAtom(void) const = 0;
 	virtual CString GetExpr(void) const = 0;
@@ -18,6 +18,9 @@ public:
 	virtual SetExpr(CString e) {}
 	// make use of a filter
 	virtual bool Satisfies(const INVOC_INFO& iv) const = 0;
+	virtual void UpdateTree(CFilter* oldf, CFilter* newf) 
+		{OutputDebugString("default update is called\n");} // implementation for atom filter
+
 #ifdef _DEBUG_FILTER
 	virtual CString BuildExpression(void) const = 0;
 #endif

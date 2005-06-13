@@ -86,6 +86,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="..\CallMon\Release\CallMon.lib"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
@@ -132,12 +133,14 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						AdditionalOptions="/Gh"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						AdditionalOptions="/Gh"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
@@ -149,11 +152,23 @@
 						Name="VCCLCompilerTool"
 						AdditionalOptions="/Gh"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/Gh"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\testDlg.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalOptions="/Gh"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						AdditionalOptions="/Gh"/>

@@ -152,33 +152,11 @@ HCURSOR CtestDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
-int WINAPI myfunc(int x)
-{
-	return x;
-}
-
-int myproc(int y)
-{
-	return y+1;
-}
-
-CString dword64tostr(DWORD64 x)
-{
-	CString s;
-	while (x)
-	{
-		s += (char)(x%10 + '0');
-		x /= 10;
-	}
-	s.MakeReverse();
-	return s;
-}
-
 void CtestDlg::OnBnClickedButton1()
 {
 	m_stats = "Calculating 10! via recursion...\r\n";
 	UpdateData(FALSE);
-	int f = fact(1);
+	int f = fact(10);
 	m_stats.AppendFormat("result=%d\r\n", f);
 	UpdateData(FALSE);
 }

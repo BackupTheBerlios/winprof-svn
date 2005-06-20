@@ -174,44 +174,25 @@ CString dword64tostr(DWORD64 x)
 	return s;
 }
 
-struct A
-{
-	virtual void f() {MessageBox(NULL, "A::f", NULL, MB_OK);}
-};
-
-struct B : public A
-{
-	virtual void f() {MessageBox(NULL, "B::f", NULL, MB_OK);}
-};
-struct C : public A
-{
-	virtual void f() {MessageBox(NULL, "C::f", NULL, MB_OK);}
-};
-struct D : public B, public C
-{
-};
-
 void CtestDlg::OnBnClickedButton1()
 {
-/*	CFile f("calllog2.prof", CFile::modeRead);
-	CALL_INFO ci;
-	CString s;
-	m_stats.Empty();
-	while (f.GetPosition() != f.GetLength())
-	{
-		f.Read(&ci, sizeof(ci));
-		s.Format("%s\t%x\t%s\r\n", ci.type==CALL_INFO_START?"start":"end", ci.address, dword64tostr(ci.time));
-		m_stats += s;
-	}*/
-	D d;
-	A& a=(C&)d;
-	a.f();
-	for (int i=0; i<1000; i++)
-	{
-		m_stats += "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\n";
-	}
-	static int x=0;
-	x++;
-	Sleep(1000*x);
+	m_stats = "Calculating 10! via recursion...\r\n";
 	UpdateData(FALSE);
+	int f = fact(1);
+	m_stats.AppendFormat("result=%d\r\n", f);
+	UpdateData(FALSE);
+}
+
+int CtestDlg::fact(int n)
+{
+	if (n == 1)
+	{
+		m_stats += "1! = 1\r\n";
+		UpdateData(FALSE);
+		return 1;
+	}
+	m_stats.AppendFormat("executing fact(%d)\r\n", n);
+	UpdateData(FALSE);
+	int f = fact(n-1) * n;
+	return f;
 }

@@ -31,4 +31,5 @@ protected:
 public:
 	afx_msg void OnBnClickedButton1();
 	CString m_stats;
+	int fact(int n);
 };

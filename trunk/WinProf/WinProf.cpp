@@ -74,6 +74,8 @@ BOOL CWinProfApp::InitInstance()
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);
+	EnableShellOpen();
+	RegisterShellFileTypes();
 	// Parse command line for standard shell commands, DDE, file open
 	CCommandLineInfo cmdInfo;
 	ParseCommandLine(cmdInfo);

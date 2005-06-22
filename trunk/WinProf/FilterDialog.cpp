@@ -77,7 +77,11 @@ BOOL CFilterDialog::OnInitDialog()
 void CFilterDialog::FillControls()
 {
 	reload_count++;
-	if (reload_count > 1) document->SetModifiedFlag();
+	if (reload_count > 1)
+	{
+		document->SetModifiedFlag();
+		GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
+	}
 
 	m_FilterBy.ResetContent();
 	m_AtomFiltersList.DeleteAllItems();

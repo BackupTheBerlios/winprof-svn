@@ -37,7 +37,7 @@ bool CFilterManager::CanDestroy(CString name)
 {
 	filname2fil_t::iterator it = filname2fil.begin();
 	for(; it != filname2fil.end(); ++it) {
-		if (it->first != (const char*)name && it->second->IsDependantOn(name))
+		if (it->first != (const char*)name && it->first[0] != '$' && it->second->IsDependantOn(name))
 			return false;
 	}
 	return true;
@@ -476,11 +476,11 @@ void CFilterManager::Serialize(CArchive& ar)
 				ar >> name >> fn >> this_func >> st;
 				ar.Read(&bnd, sizeof(stat_val_t));
 				ar >> op;
-				ASSERT(AddFilter(name, this_func, fn, st, bnd, (cmp_oper)op) == true);
+				VERIFY(AddFilter(name, this_func, fn, st, bnd, (cmp_oper)op));
 			} else { // atom == 'c'
 				CString name, expr;
 				ar >> name >> expr;
-				ASSERT(AddFilter(name, expr) == true);
+				VERIFY(AddFilter(name, expr));
 			}
 		}
 	}

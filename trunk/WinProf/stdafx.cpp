@@ -3,6 +3,7 @@
 // stdafx.obj will contain the pre-compiled type information
 
 #include "stdafx.h"
+#include <math.h>
 
 
 CString DWORD64ToStr(DWORD64 x)
@@ -27,6 +28,11 @@ CString Format(LPCTSTR format, ...)
 	s.FormatV(format, args);
 	va_end(args);
 	return s;
+}
+
+double Round(double x)
+{
+	return floor(x+0.5);
 }
 
 bool ValidForStat(CString str,  bool(*good)(char c))

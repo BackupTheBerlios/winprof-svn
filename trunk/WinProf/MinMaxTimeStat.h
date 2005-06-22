@@ -6,7 +6,7 @@ class CMinTimeStat : public CWinProfStatistics
 {
 public:
 	virtual CString ToString(stat_val_t val) const
-		{return DWORD64ToStr(val.dw64_val*1000/CWinProfDoc::m_Frequency);}
+		{return DWORD64ToStr((DWORD64)Round((double)val.dw64_val*1000/CWinProfDoc::m_Frequency));}
 	virtual CString GetStatCaption(void) const 
 		{return "Min Run Time (ms)";}
 	virtual string GetStatName() const
@@ -56,7 +56,7 @@ class CMaxTimeStat : public CWinProfStatistics
 {
 public:
 	virtual CString ToString(stat_val_t val) const
-		{return DWORD64ToStr(val.dw64_val*1000/CWinProfDoc::m_Frequency);}
+		{return DWORD64ToStr((DWORD64)Round((double)val.dw64_val*1000/CWinProfDoc::m_Frequency));}
 	virtual int StatCompare(const INVOC_INFO &c1, const INVOC_INFO &c2) const
 		{return CWinProfStatistics::StatCompare<DWORD64>(GetStatValue(c1).dw64_val, GetStatValue(c2).dw64_val);}
 	virtual CString GetStatCaption(void) const 

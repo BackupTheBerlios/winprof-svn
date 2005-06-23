@@ -134,13 +134,14 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalOptions="/Gh"
+						AdditionalOptions="/Gh /GH"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
+						AdditionalOptions="/Gh /GH"
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 			</File>
@@ -150,13 +151,13 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalOptions="/Gh"/>
+						AdditionalOptions="/Gh /GH"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalOptions="/Gh"/>
+						AdditionalOptions="/Gh /GH"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -165,13 +166,13 @@
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalOptions="/Gh"/>
+						AdditionalOptions="/Gh /GH"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
-						AdditionalOptions="/Gh"/>
+						AdditionalOptions="/Gh /GH"/>
 				</FileConfiguration>
 			</File>
 		</Filter>

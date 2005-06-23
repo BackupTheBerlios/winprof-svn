@@ -152,11 +152,23 @@ HCURSOR CtestDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+struct A
+{
+};
+
 void CtestDlg::OnBnClickedButton1()
 {
 	m_stats = "Calculating 10! via recursion...\r\n";
 	UpdateData(FALSE);
-	int f = fact(10);
+	int f=0;
+	try
+	{
+		f = fact(10);
+	}
+	catch (A& a)
+	{
+		MessageBox("caught exception");
+	}
 	m_stats.AppendFormat("result=%d\r\n", f);
 	UpdateData(FALSE);
 }
@@ -165,6 +177,7 @@ int CtestDlg::fact(int n)
 {
 	if (n == 1)
 	{
+		throw A();
 		m_stats += "1! = 1\r\n";
 		UpdateData(FALSE);
 		return 1;

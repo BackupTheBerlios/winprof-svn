@@ -27,6 +27,7 @@ we predict that there are less than 50 nested function calls
 in this case the vector won't reallocate the objects, so performance won't suffer
 */
 static std::vector<RETURN_ADDRESS> return_addr;
+static std::vector<DWORD> base_ptr;
 static std::vector<CALL_INFO> call_info;
 
 
@@ -68,42 +69,42 @@ static void LogToFile()
 #pragma warning(disable : 4311)
 #pragma warning(disable : 4312)
 
-extern "C" static __declspec(naked) void _pexit()
+extern "C" __declspec(naked) void _pexit()
 {
 	// prolog
 	__asm
 	{
-		push 0						// placeholder for return address
 		push ebp					// setup standard stack frame
 		mov ebp, esp
 		sub esp, __LOCAL_SIZE		// leave space for local variables
-		push eax					// save original function return value
-		push edx
-		push esi					// VC++ uses esi to protect esp
+		pushad
 	}
 
     DWORD frame_ptr;
 	LARGE_INTEGER time;
 	CALL_INFO ci;
 	QueryPerformanceCounter(&time);
-	ci.type = CALL_INFO_END;
-	ci.address = return_addr.back().address;
-	ci.time = time.QuadPart;
-	call_info.push_back(ci);
-    
-	__asm mov DWORD PTR [frame_ptr], ebp
-	*(unsigned long *)(frame_ptr + 4) = return_addr.back().return_address;
-	return_addr.pop_back();
 
+	__asm mov DWORD PTR [frame_ptr], ebp
+	ci.type = CALL_INFO_END;
+	ci.time = time.QuadPart;
+	while (1)
+	{
+		ci.address = return_addr.back().address;
+		return_addr.pop_back();
+		call_info.push_back(ci);
+		DWORD bp = base_ptr.back();
+		base_ptr.pop_back();
+		if (*(unsigned long *)frame_ptr == bp) break;
+	}
+    
 	LogToFile();
 
 	
 	// epilog
 	__asm
 	{
-		pop esi
-		pop edx						// restore registers
-		pop eax
+		popad
  		mov esp, ebp				// restore the standard stack frame
 		pop ebp
 		ret
@@ -132,7 +133,7 @@ extern "C" __declspec(naked) void _penter()
 	ci->address = *(unsigned long *)(frame_ptr + 4) - OFFSET_CALL;	// of called function
 	ra.address = ci->address;
 	ra.return_address = *(unsigned long *)(frame_ptr + 8);			// where the function returns to
-	*(unsigned long *)(frame_ptr + 8) = (unsigned long)_pexit;
+	base_ptr.push_back(*(unsigned long *)frame_ptr);
 	return_addr.push_back(ra);
 	ci->type = CALL_INFO_START;
 	QueryPerformanceCounter(&time);
